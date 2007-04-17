@@ -379,7 +379,6 @@ class PdfConverter:
 
         builder = Dispatch('SBPublisher.Builder')
         project = Dispatch('SBPublisher.Project')
-        project.NewUniqueID()
 
         project.AuthorFirstName = self.options.author
         project.BookTitle       = self.options.title
