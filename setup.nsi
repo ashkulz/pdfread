@@ -20,6 +20,7 @@
 
 SetCompress force
 SetCompressor /solid lzma
+AutoCloseWindow true
 !include "MUI.nsh"
 
 ;--------------------------------
@@ -40,11 +41,9 @@ SetCompressor /solid lzma
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
-!insertmacro MUI_PAGE_FINISH
 
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
-!insertmacro MUI_UNPAGE_FINISH
 
 ;--------------------------------
 ;Languages
@@ -58,7 +57,7 @@ Section "Install Section" SecInstall
 
   SetOutPath "$INSTDIR"
 
-  File /r *.*
+  File /r /x ".svn" *.*
 
   ;Create uninstaller
   WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\PDFRead" "DisplayName" "PDFRead ${VERSION}"
@@ -70,11 +69,11 @@ Section "Install Section" SecInstall
   WriteRegStr HKCR "$R0\shell\pdfread" "" "&PDFRead Conversion"
   WriteRegStr HKCR "$R0\shell\pdfread\command" "" '"$INSTDIR\pdfread-gui.exe" %1'
 skip_context:
-  WriteRegStr HKCR "AcroExch.Document\shell\pdfread\command" "" '"$INSTDIR\pdfread-gui.exe" %1'
+  WriteRegStr HKCR "AcroExch.Document.7\shell\pdfread" "" "&PDFRead Conversion"
   WriteRegStr HKCR "AcroExch.Document.7\shell\pdfread\command" "" '"$INSTDIR\pdfread-gui.exe" %1'
   SetShellVarContext all
   CreateShortCut "$SMPROGRAMS\PDFRead.lnk" "$INSTDIR\pdfread-gui.exe"
-  ExecShell "" "$INSTDIR\src\README.txt"
+  ExecShell "" "$INSTDIR\doc\index.html"
 
   WriteUninstaller "$INSTDIR\uninstall.exe"
 SectionEnd
@@ -92,6 +91,5 @@ Section "Uninstall"
   IfErrors skip_context
   DeleteRegKey  HKCR "$R0\shell\pdfread"
 skip_context:
-  DeleteRegKey  HKCR "AcroExch.Document\shell\pdfread"
   DeleteRegKey  HKCR "AcroExch.Document.7\shell\pdfread"
 SectionEnd

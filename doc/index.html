@@ -1,0 +1,190 @@
+<HTML><HEAD>
+<TITLE>PDFRead</TITLE>
+<META NAME="author" CONTENT="Ashish Kulkarni">
+<style type="text/css">
+  pre, blockquote { border: 1px solid; font-family: monospace; padding: 0.5em;}
+</style>
+</HEAD><BODY BGCOLOR="white" TEXT="black" LINK="blue" VLINK="purple">
+
+<table align="center" style='border: 1px solid' border=1 cellspacing=0 cellpadding=4><tr>
+<td style='border: 1px solid'><a href="http://pdfread.sourceforge.net/">Home</a></td>
+<td style='border: 1px solid'><a href="https://sourceforge.net/projects/pdfread">Project</a></td>
+<td style='border: 1px solid'><a href="https://sourceforge.net/project/showfiles.php?group_id=87679&package_id=91453">Download</a></td>
+
+<td style='border: 1px solid'><a href="#install">Install</a></td>
+<td style='border: 1px solid'><a href="#device">Device Support</a></td>
+<td style='border: 1px solid'><a href="#options">Command Line Options</a></td>
+<td style='border: 1px solid'><a href="#changes">Changelog</a></td>
+</tr></table>
+
+<H1>PDFRead</H1>
+
+<P>PDFRead is a tool for converting PDF and DJVU documents for reading on eBook devices. It does this by creating an image out of each page, enhancing the image and then collating the images in a device-specific format.</P>
+
+
+<H2>Features</H2>
+
+<ul>
+<li> support for PDF and DJVU documents</li>
+<li> works on Windows, Linux and OS X</li>
+<li> supports creating images for any ebook reader device</li>
+<li> out of the box profiles for the 1100/1150/1200 and PRS-500.</li>
+<li> fast and very accurate autocropping</li>
+
+<li> image dilation for more "thicker" text enabled by default</li>
+<li> automatically splitting into multiple pages for landscape mode</li>
+<li> can generate image which will fit the screen size exactly in potrait mode</li>
+<li> rotation of image for devices that don't support landscape mode</li>
+<li> option for reducing the number of colors to reduce image size</li>
+<li> output formats supported: currently html, rb, lrf, imp1, and imp2.</li>
+
+</ul>
+
+<H2 ID="install">Installation Instructions</H2>
+<H3>Windows</H3>
+<ol>
+<li>Download and install the <a href="https://sourceforge.net/project/showfiles.php?group_id=87679&package_id=91453">PDFRead installer</a>.</li>
+<li> Right-click a PDF, and choose PDFRead. Alternatively, use the start menu
+  (Start -> Programs -> PDFRead).</li>
+<li> If you choose an output eBook, then that will be the generated file name.
+   If you do not enter a filename, then it will be created in temp directory.</li>
+
+<li> To customize a profile, check the "customize" box and specify parameters.</li>
+<li> To uninstall, remove it from Add/Remove Programs.</li>
+</ol>
+
+<h3>Linux</h3>
+<em>This assumes you have Ubuntu. If you don't, then install the equivalent
+packages for your distribution.</em>
+<ol>
+<li>Open up a terminal window, and install the following packages:<blockquote>sudo apt-get install pdftk python-imaging xpdf-utils imagemagick gs-common djvulibre-bin</blockquote></li>
+<li>Download the <a href="https://sourceforge.net/project/showfiles.php?group_id=87679&package_id=91453">PDFRead source code</a> and extract it somewhere.</li>
+
+<li>The above directory will contain a command line program, execute it via <blockquote>python pdfread.py &lt;options&gt; pdf-file</blockquote></li>
+<li>Read the <a href="#options">command line options</a>.</li>
+</ol>
+
+<h3>Mac OS X</h3>
+<em>(based on sammykrupa's instructions)</em>
+<ol>
+
+<li>Install the <a href="http://developer.apple.com/tools/">Apple developer tools</a>.</li>
+<li>Install the <a href="http://www.python.org/download/">latest python</a> version. The Mac OS X installer application puts a big "MacPython 2.5" folder in your applications folder. Go into that folder and double-click the "Update Shell Profile.command" file.</li>
+<li>Install <a href="http://www.finkproject.org/download/index.php">fink</a> and then install the necessary packages by typing this in the Terminal:
+<blockquote>sudo apt-get install xpdf imagemagick ghostscript ghostscript-fonts</blockquote></li>
+<li>Download the <a href="http://www.pythonware.com/products/pil/">latest Python Imaging Library source</a>, extract it and install it via
+
+<blockquote>sudo python setup.py install</blockquote></li>
+<li>In case you want to convert DJVU documents, please install <a href="http://pdb.finkproject.org/pdb/package.php/djvulibre">djvulibre from Fink</a> or install it yourself.</li>
+<li>Download the <a href="https://sourceforge.net/project/showfiles.php?group_id=87679&package_id=91453">PDFRead source code</a> and extract it somewhere.</li>
+<li>The above directory will contain a command line program, execute it via <blockquote>python pdfread.py &lt;options&gt; pdf-file</blockquote></li>
+
+<li>Read the <a href="#options">command line options</a>.</li>
+</ol>
+
+<H2 id="device">Device Support</H2>
+
+<H3>Rocket eBook / REB 1100</H3>
+
+<ul>
+<li>Use the reb1100 profile, which will always create images in landscape mode. You may have to switch the device to landscape mode.</li>
+<li>If you are on Linux or OS X, you may need to compile and install <a href="http://rbmake.sourceforge.net">rbmake</a>.</li>
+
+<li>Default options for the profile reb1100:<blockquote>
+  rotate=none hres=472 format=rb vres=315 overlap=25</blockquote></li>
+<li>Typical command line usage:<blockquote>pdfread -p reb1100 &lt;pdf-file&gt;</blockquote></li>
+</ul>
+
+<H3>eBookwise 1150 / ETI-2 / REB 1150</H3>
+
+<ul>
+<li>Use the eb1150 profile, which will always create images in landscape mode.
+  You will have to hold the device sideways. <blockquote>Tip: you may want to enable
+  "reverse paging" in settings, so that you can advance to the next page
+  using the left button (which is normally the bottom one).</blockquote></li>
+
+<li>If you are on Windows, please install <a href="http://www.ebooktechnologies.com/support_publisher_download.htm">eBook Publisher</a>. Please uninstall and reinstall it if you already have it installed, as there   may be problems if you have installed GEB Librarian after it.</li>
+<li>If you are on Linux or OS X, then an IMP file will not be created. You will
+  have to create it by either copying the output directory to a Windows machine
+  (real or virtual), and then creating an IMP with "ebook.html" in the above
+  directory as the source. I recommend that you run Windows in VMWare or equivalent tools.</li>
+<li>Default options for the profile eb1150:<blockquote>rotate=left hres=445 format=imp2 vres=315 overlap=25 colors=16</blockquote></li>
+<li>Typical command line usage:<blockquote>pdfread -p eb1150 &lt;pdf-file&gt;</blockquote></li>
+</ul>
+
+<H3>REB 1200 / Gemstar 2150</H3>
+
+<ul>
+<li>Use the reb1200 profile, which will always create images in landscape mode.
+  You will have to hold the device sideways.</li>
+<li>If you are on Windows, please install <a href="http://www.ebooktechnologies.com/support_publisher_download.htm">eBook Publisher</a>. Please uninstall and reinstall it if you already have it installed, as there   may be problems if you have installed GEB Librarian after it.</li>
+<li>If you are on Linux or OS X, then an IMP file will not be created. You will
+  have to create it by either copying the output directory to a Windows machine
+  (real or virtual), and then creating an IMP with "ebook.html" in the above
+  directory as the source. I recommend that you run Windows in VMWare or equivalent tools.</li>
+<li>Default options for the profile reb1200:<blockquote>
+  rotate=left hres=595 format=imp1 vres=455 overlap=25</blockquote></li>
+<li>Typical command line usage:<blockquote>pdfread -p reb1200 &lt;pdf-file&gt;</blockquote></li>
+
+</ul>
+
+<h3>Sony Reader PRS-500 / Librie</h3>
+
+<ul>
+<li>There are two profiles you can use: prs500 and prs500-l.<ol>
+  <li>The prs500 profile creates a typical LRF in potrait mode. Default options for the profile prs500:<blockquote>
+  rotate=none hres=565 format=lrf vres=754 nosplit=1 colors=4</blockquote></li><li>The prs500-l
+  profile rotates the PDF and creates it in landscape mode, which should
+  result in much better legiblity at the expense of splitting up the page. Default options for the profile prs500-l:<blockquote>
+  rotate=left hres=754 format=lrf vres=565 overlap=25 colors=4</blockquote></li></ol></li>
+
+<li>Typical command line usage:<blockquote>pdfread -p prs500 &lt;pdf-file&gt;</blockquote></li>
+</ul>
+
+<h2 id="options">Command Line Options</h2>
+
+<pre>
+Usage: pdfread [options] input-pdf
+
+Options:
+  -h, --help          show this help message and exit
+  -p PROFILE          one of: eb1150, prs500, reb1200, reb1100, prs500-l
+  -o OUTPUT           the output eBook filename
+  -t TITLE            the title for the generated ebook
+  -a AUTHOR           the author for the generated ebook
+  -c CATEGORY         the category for the generated ebook
+  -f FORMAT           one of: imp2, imp1, html, rb, lrf
+  -i FORMAT           one of: pdf, djvu
+  -d DIR              the temporary directory where images are generated
+  --dpi=DPI           the DPI at which to perform dilation (default: 300)
+  --autocontrast=N    normalize image contrast for N percent (default: 5)
+  --gscrop            perform extra cropping using ghostscript
+  --colors=N          downsample the output image to N grayscale colors
+  --nosplit           do not split up pages
+  --rotate=DIRECTION  one of: none, left, or right
+  --pages=N           consider that the document has N pages
+  --hres=HRES         the maximum usable horizontal resolution
+  --vres=VRES         the maximum usable vertical resolution
+  --overlap=OVERLAP   screen overlap between pages (in pixels)
+  --help-profiles     show the various profile settings
+</pre>
+
+
+
+
+<H2 id="changes">Changelog</H2>
+
+<h3>[2006-04-06] v5</h3>
+<ul>
+<li> add DJVU input support</li>
+<li> allow specifying custom options in the Windows GUI</li>
+<li> OS X support fixes (based on sammykrupa's input)</li>
+<li> tweaks in the EB-1150 and REB-1200 profile</li>
+<li> do not split page if the generated image width/height is less than the device parameters. This caused too many blank pages to be created.</li>
+
+</ul>
+
+
+<HR>
+<P> PDFRead was created by
+<A HREF="http://puggy.symonds.net/~ashish/">Ashish Kulkarni</A> with lots of help from Falstaff, alex_d, sammykrupa and many others from the Mobileread forums. It is licensed under the  <A HREF="http://www.opensource.org/licenses/mit-license.php">MIT license</A>.
