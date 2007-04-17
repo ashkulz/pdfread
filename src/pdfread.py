@@ -53,6 +53,24 @@ COMMANDS = {
   'djvused' : False
 }
 
+## The edge enhancing technique is taken from Philip R. Thompson's "xim"
+## program, which in turn took it from section 6 of "Digital Halftones by
+## Dot Diffusion", D. E. Knuth, ACM Transaction on Graphics Vol. 6, No. 4,
+## October 1987, which in turn got it from two 1976 papers by J. F. Jarvis
+## et. al.
+class EdgeEnhanceFilter(ImageFilter.Kernel):
+  def __init__(self, n):
+    if n < 1 or n > 9:
+      raise ValueError("enhancement parameter incorrect")
+      
+    self.name = 'Edge-enhancement'
+    phi    = n / 10.0
+    omphi  = 1.0 - phi
+    kernel = [-phi/9.0] * 9
+    kernel[4] = kernel[4] + 1.0
+    
+    self.filterargs = (3,3), omphi, 0.5, kernel
+
 IMAGENAME_SPEC = '%d.png'
 
 class PdfConverter:
