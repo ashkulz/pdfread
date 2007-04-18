@@ -18,7 +18,7 @@
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ## DEALINGS IN THE SOFTWARE.
 
-import os, sys, subprocess
+import os, sys, subprocess, Image
 
 ########################################################### CONSTANTS
 
@@ -42,7 +42,7 @@ COMMANDS = {
 ########################################################### PROFILES
 
 PROFILES = {
-  'reb1100'   : {'hres': 472, 'vres':315, 'nosplit': 0, 'overlap':25, 'rotate':'none', 'colors': 0,  'format': 'rb'  },
+  'reb1100'   : {'hres': 315, 'vres':472, 'nosplit': 0, 'overlap':25, 'rotate':'none', 'colors': 0,  'format': 'rb'  },
   'eb1150'    : {'hres': 445, 'vres':315, 'nosplit': 0, 'overlap':25, 'rotate':'left', 'colors': 16, 'format': 'imp2'},
   'reb1200'   : {'hres': 595, 'vres':455, 'nosplit': 0, 'overlap':25, 'rotate':'left', 'colors': 0,  'format': 'imp1'},
   'prs500'    : {'hres': 565, 'vres':754, 'nosplit': 1, 'overlap':0,  'rotate':'none', 'colors': 4,  'format': 'lrf' },
@@ -54,6 +54,30 @@ ROTATION = {
   'left'  : Image.ROTATE_90,
   'right' : Image.ROTATE_270
 }
+
+###################################################### BASE CLASSES
+
+""" superclass for all input formats """
+class BaseInput(object):
+
+  """ ignore all keyword arguments """
+  def __init__(self, **args):
+    pass
+
+""" superclass for all image transforms """
+class BaseTransform(object):
+
+  """ ignore all keyword arguments """
+  def __init__(self, **args):
+    pass
+
+""" superclass for all output generators """
+class BaseOutput(object):
+
+  """ initalise """
+  def __init__(self, n_, input_, title, author, category, output, **args):
+    self.title, self.author, self.category = title, author, category
+    self.n, self.input, self.output        = n_, input_, output
 
 ########################################################### METHODS
 
@@ -87,7 +111,7 @@ def p(str, *args):
   sys.stdout.write(str % tuple(args))
   sys.stdout.flush()
 
-def check_commands(self):
+def check_commands():
   for command in COMMANDS.keys():
     try:
       call(command)
@@ -95,3 +119,10 @@ def check_commands(self):
     except:
       pass
 
+def get_plugins(base_type):
+  mapping = {}
+  for type in base_type.__subclasses__():
+    if hasattr(type, '__plugin__'):
+      mapping[type.__plugin__] = type
+      mapping.update( get_plugins(type) )
+  return mapping

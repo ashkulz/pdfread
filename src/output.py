@@ -24,23 +24,12 @@ import os, sys, shutil, traceback
 from common import *
 
 
-########################################################## BASE OUTPUT
-
-
-""" superclass for all output generators """
-class BaseOutput(object):
-
-  """ initalise """
-  def __init__(self, n_, input_, title, author, category, output, **args):
-    self.title, self.author, self.category = title, author, category
-    self.n, self.input, self.output        = n_, input_, output
-
-
 ########################################################## HTML OUTPUT
 
 
 """ support for HTML output """
 class HtmlOutput(BaseOutput):
+  __plugin__ = 'html'
 
   """ generate an HTML table-of-contents """
   def toc_text(self):
@@ -96,6 +85,7 @@ class HtmlOutput(BaseOutput):
 
 """ support for Rocket eBook (RB) output """
 class RocketBookOutput(HtmlOutput):
+  __plugin__ = 'rb'
 
   """ generate a rocket ebook """
   def generate(self):
@@ -172,12 +162,14 @@ class ImpOutput(HtmlOutput):
 
 """ support for IMP output for the FullVga profile """
 class FullVgaImpOutput(ImpOutput):
-
+  __plugin__ = 'imp1'
+  
   def generate(self):
     self.generate_imp(1)
 
 """ support for IMP output for the HalfVga profile """
 class HalfVgaImpOutput(ImpOutput):
+  __plugin__ = 'imp2'
 
   def generate(self):
     self.generate_imp(2)
@@ -188,6 +180,7 @@ class HalfVgaImpOutput(ImpOutput):
 
 """ support for Sony BBeB output """
 class LrfOutput(BaseOutput):
+  __plugin__ = 'lrf'
 
   """ generate a LRF file """
   def generate(self):
@@ -230,14 +223,3 @@ class LrfOutput(BaseOutput):
 
     return False
 
-
-########################################################### ALL
-
-
-ALL = {
-  'html' : HtmlOutput,
-  'rb'   : RocketBookOutput,
-  'lrf'  : LrfOutput,
-  'imp2' : FullVgaImpOutput,
-  'imp1' : HalfVgaImpOutput
-}

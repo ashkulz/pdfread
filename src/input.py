@@ -20,7 +20,6 @@
 
 
 import os, re
-
 from common import *
 
 
@@ -33,13 +32,13 @@ PDFINFO_COUNT = re.compile(r'Pages:\s+(\d+)')
 
 
 """ support for the PDF format """
-class PdfInput(object):
+class PdfInput(BaseInput):
+  __plugin__ = 'pdf'
 
   """ initalise """
   def __init__(self, input, dpi, gs_crop, **args):
     self.input, self.dpi, self.gs_crop = input, dpi, gs_crop
     self.get_meta_info()
-
 
   """ get meta information from the PDF file """
   def get_meta_info(self):
@@ -65,7 +64,7 @@ class PdfInput(object):
 
     # if nothing found, ask the user for the information
     if not self.count:
-      p('Unable to determine total number of pages in document')
+      p('Unable to determine total number of pages in document\n')
       self.count = int(raw_input('Please enter number of pages: '))
 
 
@@ -107,7 +106,8 @@ class PdfInput(object):
 
 
 """ support for the DJVU format """
-class DjvuInput(object):
+class DjvuInput(BaseInput):
+  __plugin__ = 'djvu'
 
   """ initalise """
   def __init__(self, input, dpi, **args):
@@ -141,11 +141,3 @@ class DjvuInput(object):
 
     return Image.open('page.pbm').convert('L')
 
-
-########################################################### ALL
-
-
-ALL = {
-  'pdf'  : PdfInput,
-  'djvu' : DjvuInput,
-}
