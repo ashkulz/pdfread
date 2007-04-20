@@ -37,10 +37,11 @@ class EdgeEnhanceFilter(ImageFilter.Kernel):
     self.name = 'Edge-enhancement'
     phi    = n / 10.0
     omphi  = 1.0 - phi
-    kernel = [-phi/9.0] * 9
-    kernel[4] = kernel[4] + 1.0
+    x      = -phi/9.0
 
-    self.filterargs = (3,3), omphi, 0.5, kernel
+    self.filterargs = (3,3), omphi, 0.5, [x,    x,    x,
+                                          x,  1+x,    x,
+                                          x,    x,    x]
 
 
 ##############################################################################

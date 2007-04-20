@@ -25,10 +25,10 @@
 import os, sys, Image, ImageFilter, ImageChops, ImageOps, optparse
 
 
-from common import *
+from common  import *
 from process import *
-from input import *
-from output import *
+from input   import *
+from output  import *
 
 class PdfConverter:
 
@@ -122,9 +122,9 @@ def parse_cmdline():
 
   parser.add_option('-p', dest='profile', choices=profiles, help=opt_help(profiles))
   parser.add_option('-o', dest='output',   help='the output filename')
-  parser.add_option('-t', dest='title',    help='generated ebook title (default: %default)')
-  parser.add_option('-a', dest='author',   help='generated ebook author (default: %default)')
-  parser.add_option('-c', dest='category', help='generated ebook category (default: %default)')
+  parser.add_option('-t', dest='title',    help='generated ebook title (default: "%default")')
+  parser.add_option('-a', dest='author',   help='generated ebook author (default: "%default")')
+  parser.add_option('-c', dest='category', help='generated ebook category (default: "%default")')
   parser.add_option('-f', dest='out_format', metavar='FORMAT',
                     choices=out_formats.keys(), help=opt_help(out_formats.keys()))
   parser.add_option('-i', dest='in_format',  metavar='FORMAT',
@@ -132,9 +132,9 @@ def parse_cmdline():
   parser.add_option('-d', dest='tempdir', metavar='DIR',
                     help='the temporary directory where images are generated')
   parser.add_option('--optimize', action='store_true', help='optimize generated PNG images (very slow!)')
-  parser.add_option('--dpi', dest='dpi', type='int',
+  parser.add_option('--dpi', type='int',
                     help='the DPI at which to perform dilation (default: %default)')
-  parser.add_option('--colors', dest='colors', metavar='N', type='int',
+  parser.add_option('--colors', metavar='N', type='int',
                     help='downsample the output image to N grayscale colors')
   parser.add_option('--mono', dest='colors', action='store_const', const=2,
                     help='downsample the output image to monochrome')
@@ -142,25 +142,17 @@ def parse_cmdline():
                     help='do not split up pages')
   parser.add_option('--rotate', dest='rotate', choices=ROTATION.keys(), metavar='DIRECTION',
                     help=opt_help(ROTATION.keys()))
-  parser.add_option('--count', dest='count', type='int',
-                    metavar='N', help='consider that the document has N pages')
+  parser.add_option('--count', type='int', metavar='N', help='consider that the document has N pages')
   parser.add_option('--hres', dest='hres', type='int',       help='the maximum usable horizontal resolution')
   parser.add_option('--vres', dest='vres', type='int',       help='the maximum usable vertical resolution')
   parser.add_option('--overlap', dest='overlap', type='int', help='screen overlap between pages (in pixels)')
-  parser.add_option('--help-profiles', dest='profile_help', action='store_true',
-                    help='show the various profile settings')
-  parser.add_option('--dump-profiles', dest='profile_dump', action='store_true',
-                    help=optparse.SUPPRESS_HELP)
+  parser.add_option('--list-profiles', dest='profile_help', action='store_true',
+                    help='show the various profiles and their settings')
 
   (options, args) = parser.parse_args()
 
   if options.profile_help:
-    for profile in PROFILES:
-      print 'Default options for the profile %s:\n ' % profile,
-      for key in PROFILES[profile]:
-          if PROFILES[profile][key]:
-              print '%s=%s' % (key, PROFILES[profile][key]),
-      print '\n'
+    profile_help()
     sys.exit(0)
 
   if not len(args) == 1:

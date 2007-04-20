@@ -43,10 +43,10 @@ COMMANDS = {
 
 PROFILES = {
   'reb1100'   : {'hres': 315, 'vres':472, 'nosplit': 0, 'overlap':25, 'rotate':'none', 'colors': 0,  'format': 'rb'  },
-  'eb1150'    : {'hres': 445, 'vres':315, 'nosplit': 0, 'overlap':25, 'rotate':'left', 'colors': 16, 'format': 'imp2'},
-  'reb1200'   : {'hres': 595, 'vres':455, 'nosplit': 0, 'overlap':25, 'rotate':'left', 'colors': 0,  'format': 'imp1'},
+  'eb1150'    : {'hres': 315, 'vres':445, 'nosplit': 0, 'overlap':25, 'rotate':'left', 'colors': 16, 'format': 'imp2'},
+  'reb1200'   : {'hres': 455, 'vres':595, 'nosplit': 0, 'overlap':25, 'rotate':'left', 'colors': 0,  'format': 'imp1'},
   'prs500'    : {'hres': 565, 'vres':754, 'nosplit': 1, 'overlap':0,  'rotate':'none', 'colors': 4,  'format': 'lrf' },
-  'prs500-l'  : {'hres': 754, 'vres':565, 'nosplit': 0, 'overlap':25, 'rotate':'left', 'colors': 4,  'format': 'lrf' }
+  'prs500-l'  : {'hres': 565, 'vres':754, 'nosplit': 0, 'overlap':25, 'rotate':'left', 'colors': 4,  'format': 'lrf' }
 }
 
 ROTATION = {
@@ -126,3 +126,11 @@ def get_plugins(base_type):
       mapping[type.__plugin__] = type
       mapping.update( get_plugins(type) )
   return mapping
+  
+def profile_help():
+  for profile in PROFILES:
+    print profile + ':\n ',
+    for key in PROFILES[profile]:
+        if PROFILES[profile][key]:
+            print '%s=%s' % (key, PROFILES[profile][key]),
+    print '\n'
