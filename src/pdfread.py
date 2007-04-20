@@ -30,92 +30,80 @@ from process import *
 from input   import *
 from output  import *
 
-class PdfConverter:
+OUT_FORMATS = get_plugins(BaseOutput)
+IN_FORMATS  = get_plugins(BaseInput)
+MODES       = get_plugins(BaseMode)
 
-  """ convert all pages to PNG images """
-  def convert_pages_to_png(self, input, pipeline, output):
-    for n in range(1, input.count+1):
+def convert(pages, input, mode, output, edge_level=DEFAULT_EDGE_ENHANCE,
+             no_crop=False, no_dilate=False, no_enhance=False):
 
-      # map the current logical page to a image
-      input.toc_map[n] = output.n
+  for page in pages:
+    p('Page %4d/%d: %s', page, input.count, 'EXTRACT ')
 
-      p('Page %4d/%d: %s', n, input.count, 'EXTRACT ')
+    image = input.get_page(page)
+    if not image:
+      p('BLANK\n')
+      continue
 
-      image = input.get_page(n)
+    if not no_crop:
+      image = crop(image)
       if not image:
         p('BLANK\n')
         continue
 
-      result = [image]
-      for step in pipeline:
-        result = step(result)
-        if not result:
-          break
-        
-      if not result:
-        continue
+    if not no_dilate:
+      image = dilate(image)
 
-      p('SAVE ')
-      output(result)
-      p('DONE\n')
+    if not no_enhance:
+      image = edge_enhance(image, edge_level)
+      
+    output.add_page(page, mode(image))
+    p('DONE\n')
 
-    # cleanup
-    for file in ['page.eps', 'page.png', 'page.pnm']:
-      if os.path.exists(file):
-        os.remove(file)
+def main():
+  input, output, mode, options, parser = parse_cmdline()
 
-  ##############################################################################
+  if options.colors >= 2 and not COMMANDS['convert']:
+    parser.error('To use color downsampling, please install ImageMagick')
+    sys.exit(1)
 
-  """ main function """
-  def main(self):
-    self.input, self.options, parser = parse_cmdline()
-    if self.options.colors >= 2 and not COMMANDS['convert']:
-      parser.error('To use color downsampling, please install ImageMagick')
-      sys.exit(1)
+  first = options.first_page or 1
+  last  = options.last_page  or input.count
 
-    print "\nTemporary directory: ", self.options.tempdir, '\n'
+  pages = range(first, last+1)
 
-    cwd = os.getcwd()
-    os.chdir(self.options.tempdir)
-    
-    plugins = get_plugins(BaseTransform)
-    stages = ['crop', 'dilate', 'split-landscape']
-    pipeline = []
-    for stage in stages:
-      pipeline.append( plugins[stage](**self.options.__dict__) )
-    
-    save = SavePng(**self.options.__dict__)
-    self.convert_pages_to_png(self.input, pipeline, save)
+  print '\nTemporary directory: ', options.tempdir, '\n'
 
-    output = get_plugins(BaseOutput)[self.options.out_format]
-    
-    delete = output(save.n, self.input, **self.options.__dict__).generate()
+  cwd = os.getcwd()
+  os.chdir(options.tempdir)
 
-    os.chdir(cwd)
+  convert(pages, input, mode, output,
+          options.edge_level, options.no_crop,
+          options.no_dilate, options.no_enhance)
 
-    if delete:
-      shutil.rmtree(self.options.tempdir, True)
-    else:
-      print "\nOutput directory: ", self.options.tempdir, '\n'
-      if sys.platform == 'win32':
-        os.startfile(self.options.tempdir)
+  delete = output.generate(input.toc)
+  os.chdir(cwd)
 
+  if delete:
+    shutil.rmtree(options.tempdir, True)
+  else:
+    print "\nOutput directory: ", options.tempdir, '\n'
+    if sys.platform == 'win32':
+      os.startfile(options.tempdir)
 
 ##############################################################################
 
 def opt_help(list):
-  return 'one of: ' + ', '.join(list) + ' (default: %default)'
+  return 'one of: ' + ', '.join(list)
 
 """ parse the command line """
 def parse_cmdline():
-  profiles    = PROFILES.keys()
-  out_formats = get_plugins(BaseOutput)
-  in_formats  = get_plugins(BaseInput)
+  profiles = PROFILES.keys()
 
   parser = optparse.OptionParser(usage='%prog [options] input-pdf')
 
-  parser.set_defaults(profile=DEFAULT_PROFILE, dpi=DEFAULT_DPI,
-                      in_format=DEFAULT_INPUT_FORMAT,
+  parser.set_defaults(profile=DEFAULT_PROFILE, in_format=DEFAULT_INPUT_FORMAT,
+                      dpi=DEFAULT_DPI, edge_level = DEFAULT_EDGE_ENHANCE,
                       title='Unknown', author='Unknown', category='General',
                       colors=None, nosplit=None, count=None,
                       profile_help=None, profile_dump=None)
@@ -126,26 +114,31 @@ def parse_cmdline():
   parser.add_option('-a', dest='author',   help='generated ebook author (default: "%default")')
   parser.add_option('-c', dest='category', help='generated ebook category (default: "%default")')
   parser.add_option('-f', dest='out_format', metavar='FORMAT',
-                    choices=out_formats.keys(), help=opt_help(out_formats.keys()))
+                    choices=OUT_FORMATS.keys(), help=opt_help(OUT_FORMATS.keys()))
   parser.add_option('-i', dest='in_format',  metavar='FORMAT',
-                    choices=in_formats.keys(),  help=opt_help(in_formats.keys()))
+                    choices=IN_FORMATS.keys(),  help=opt_help(IN_FORMATS.keys()))
+  parser.add_option('-m', dest='mode', choices=MODES.keys(), help=opt_help(MODES.keys()))
   parser.add_option('-d', dest='tempdir', metavar='DIR',
                     help='the temporary directory where images are generated')
-  parser.add_option('--optimize', action='store_true', help='optimize generated PNG images (very slow!)')
+  parser.add_option('--first-page', metavar='PAGE', type='int', help='first page to convert')
+  parser.add_option('--last-page', metavar='PAGE', type='int',  help='last page to convert')
+  parser.add_option('--optimize', action='store_true', help='optimize generated PNG images')
+  parser.add_option('--edge-level', type='int', metavar='L', help='edge enhancement level from 1-9 (default: %default)')
   parser.add_option('--dpi', type='int',
                     help='the DPI at which to perform dilation (default: %default)')
   parser.add_option('--colors', metavar='N', type='int',
                     help='downsample the output image to N grayscale colors')
   parser.add_option('--mono', dest='colors', action='store_const', const=2,
                     help='downsample the output image to monochrome')
-  parser.add_option('--nosplit', dest='nosplit', action='store_const', const=1,
-                    help='do not split up pages')
-  parser.add_option('--rotate', dest='rotate', choices=ROTATION.keys(), metavar='DIRECTION',
+  parser.add_option('--rotate', choices=ROTATION.keys(), metavar='DIRECTION',
                     help=opt_help(ROTATION.keys()))
   parser.add_option('--count', type='int', metavar='N', help='consider that the document has N pages')
   parser.add_option('--hres', dest='hres', type='int',       help='the maximum usable horizontal resolution')
   parser.add_option('--vres', dest='vres', type='int',       help='the maximum usable vertical resolution')
   parser.add_option('--overlap', dest='overlap', type='int', help='screen overlap between pages (in pixels)')
+  parser.add_option('--no-crop',    action='store_true',   help='disable the cropping stage')
+  parser.add_option('--no-dilate',  action='store_true',   help='disable the dilation stage')
+  parser.add_option('--no-enhance', action='store_true',   help='disable the edge enhancement stage')
   parser.add_option('--list-profiles', dest='profile_help', action='store_true',
                     help='show the various profiles and their settings')
 
@@ -175,10 +168,10 @@ def parse_cmdline():
     options.colors     = PROFILES[options.profile]['colors']
 
   if options.out_format is None:
-    options.out_format  = PROFILES[options.profile]['format']
+    options.out_format = PROFILES[options.profile]['format']
 
-  if options.nosplit is None:
-    options.nosplit    = PROFILES[options.profile]['nosplit']
+  if options.mode is None:
+    options.mode       = PROFILES[options.profile]['mode']
 
   if not options.tempdir:
     import tempfile
@@ -188,11 +181,16 @@ def parse_cmdline():
     options.output     = os.path.abspath(options.output)
 
   check_commands()
-  inp = in_formats[options.in_format](args[0], **options.__dict__)
 
-  return inp, options, parser
+  opt = options.__dict__
+
+  input  = IN_FORMATS[options.in_format](args[0], **opt)
+  output = OUT_FORMATS[options.out_format](**opt)
+  mode   = MODES[options.mode](**opt)
+
+  return input, output, mode, options, parser
 
 ##############################################################################
 
 if __name__ == '__main__':
-  PdfConverter().main()
+  main()

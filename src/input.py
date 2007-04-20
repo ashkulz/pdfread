@@ -80,7 +80,11 @@ class PdfInput(BaseInput):
     if not os.path.exists('page.png'):
       return None
 
-    return Image.open('page.png')
+    image = Image.open('page.png')
+    image.load()
+    rm('page.png')
+    
+    return image
 
 
 ########################################################## DJVU INPUT
@@ -119,5 +123,8 @@ class DjvuInput(BaseInput):
     if not os.path.exists('page.pbm'):
       return None
 
-    return Image.open('page.pbm').convert('L')
-
+    image = Image.open('page.pbm').convert('L')
+    image.load()
+    rm('page.pbm')
+    
+    return image

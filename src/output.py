@@ -32,12 +32,12 @@ class HtmlOutput(BaseOutput):
   __plugin__ = 'html'
 
   """ generate an HTML table-of-contents """
-  def toc_text(self):
+  def toc_text(self, toc):
     current  = 0
     toc_text = ''
-    toc_map  = self.input.toc_map
+    toc_map  = self.toc_map
 
-    for title_, level_, page_ in self.input.toc:
+    for title_, level_, page_ in toc:
       title, level, page = title_.strip(), int(level_), int(page_)
 
       if level > current:
@@ -56,7 +56,7 @@ class HtmlOutput(BaseOutput):
     return toc_text
 
   """ generate an HTML file """
-  def generate(self):
+  def generate(self, toc):
     output = """
 <html>
  <head>
@@ -68,12 +68,11 @@ class HtmlOutput(BaseOutput):
  <body>
    <h1 align="center">%(title)s</h1>
    %(toc)s""" % dict(title=self.title, author=self.author,
-                     category=self.category, toc=self.toc_text())
+                     category=self.category, toc=self.toc_text(toc))
 
     for i in range(self.n):
       name = IMAGENAME_SPEC % i
-      if os.path.exists(name):
-        output += '<p><a name="img%d"></a><img src="%s"/></p>\n' % (i, name)
+      output += '<p><a name="img%d"></a><img src="%s"/></p>\n' % (i, name)
     output += '</body></html>'
     write_file('ebook.html', output)
 
@@ -88,9 +87,9 @@ class RocketBookOutput(HtmlOutput):
   __plugin__ = 'rb'
 
   """ generate a rocket ebook """
-  def generate(self):
+  def generate(self, toc):
 
-    HtmlOutput.generate(self)
+    HtmlOutput.generate(self, toc)
 
     if COMMANDS['rbmake']:
       p('\nCreating Rocket eBook ... ')
@@ -111,9 +110,9 @@ class RocketBookOutput(HtmlOutput):
 class ImpOutput(HtmlOutput):
 
   """ generate a IMP for the specified device """
-  def generate_imp(self, device):
+  def generate_imp(self, toc, device):
 
-    HtmlOutput.generate(self)
+    HtmlOutput.generate(self, toc)
 
     if sys.platform != 'win32':
       p('IMP creation disabled (works only on Windows).\n')
@@ -164,15 +163,15 @@ class ImpOutput(HtmlOutput):
 class FullVgaImpOutput(ImpOutput):
   __plugin__ = 'imp1'
   
-  def generate(self):
-    self.generate_imp(1)
+  def generate(self, toc):
+    self.generate_imp(toc, 1)
 
 """ support for IMP output for the HalfVga profile """
 class HalfVgaImpOutput(ImpOutput):
   __plugin__ = 'imp2'
 
-  def generate(self):
-    self.generate_imp(2)
+  def generate(self, toc):
+    self.generate_imp(toc, 2)
 
 
 ########################################################## BBEB OUTPUT
@@ -183,7 +182,7 @@ class LrfOutput(BaseOutput):
   __plugin__ = 'lrf'
 
   """ generate a LRF file """
-  def generate(self):
+  def generate(self, toc):
     from pylrs.pylrs import Book, PageStyle, BlockStyle
     from pylrs.pylrs import ImageStream, BlockSpace, ImageBlock
 
@@ -207,8 +206,8 @@ class LrfOutput(BaseOutput):
       images.append(image)
 
     # generate TOC, if present
-    toc_map = self.input.toc_map
-    for title, level, page_ in self.input.toc:
+    toc_map = self.toc_map
+    for title, level, page_ in toc:
       imagenum = toc_map[int(page_)]
       book.addTocEntry(title.strip(), images[imagenum])
 
@@ -222,4 +221,3 @@ class LrfOutput(BaseOutput):
       return True
 
     return False
-
