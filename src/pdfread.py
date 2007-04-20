@@ -115,7 +115,7 @@ def parse_cmdline():
   parser = optparse.OptionParser(usage='%prog [options] input-pdf')
 
   parser.set_defaults(profile=DEFAULT_PROFILE, dpi=DEFAULT_DPI,
-                      in_format=DEFAULT_INPUT_FORMAT, gs_crop=False,
+                      in_format=DEFAULT_INPUT_FORMAT,
                       title='Unknown', author='Unknown', category='General',
                       colors=None, nosplit=None, count=None,
                       profile_help=None, profile_dump=None)
@@ -134,8 +134,6 @@ def parse_cmdline():
   parser.add_option('--optimize', action='store_true', help='optimize generated PNG images (very slow!)')
   parser.add_option('--dpi', dest='dpi', type='int',
                     help='the DPI at which to perform dilation (default: %default)')
-  parser.add_option('--gscrop', dest='gs_crop', action='store_true',
-                    help='perform extra cropping using ghostscript (only for PDF)')
   parser.add_option('--colors', dest='colors', metavar='N', type='int',
                     help='downsample the output image to N grayscale colors')
   parser.add_option('--mono', dest='colors', action='store_const', const=2,
@@ -198,7 +196,7 @@ def parse_cmdline():
     options.output     = os.path.abspath(options.output)
 
   check_commands()
-  inp = in_formats[options.in_format](os.path.abspath(args[0]), **options.__dict__)
+  inp = in_formats[options.in_format](args[0], **options.__dict__)
 
   return inp, options, parser
 

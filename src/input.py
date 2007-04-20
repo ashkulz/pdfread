@@ -36,8 +36,8 @@ class PdfInput(BaseInput):
   __plugin__ = 'pdf'
 
   """ initalise """
-  def __init__(self, input, dpi, gs_crop, **args):
-    self.input, self.dpi, self.gs_crop = input, dpi, gs_crop
+  def __init__(self, input, dpi, **args):
+    self.input, self.dpi = os.path.abspath(input), dpi
     self.get_meta_info()
 
   """ get meta information from the PDF file """
@@ -71,30 +71,11 @@ class PdfInput(BaseInput):
   """ get a page from the PDF file """
   def get_page(self, n):
 
-    call('pdftops', '-f', str(n), '-l', str(n), '-eps',
-         self.input, 'page.eps')
-
-    if self.gs_crop:
-      p('GSCROP ')
-
-      # find the crop box from GhostScript
-      gs_box = call('gs', '-q', '-dBATCH', '-dSAFER', '-dNOPAUSE',
-                    '-sDEVICE=bbox', 'page.eps')
-      box    = re.findall('(%%HiResBoundingBox: .*)', gs_box)[0]
-
-      # replace the newly detected crop box in the EPS file
-      data = read_file('page.eps')
-      data = re.sub('%%HiResBoundingBox: .*', '',
-                    re.sub('%%BoundingBox: .*', box, data))
-      write_file('page.eps', data)
-
     p('RASTERIZE ')
-
-    # rasterize to a high-res image with specified dpi
-    call('gs', '-q', '-dBATCH', '-dSAFER', '-dNOPAUSE', '-r%d' % self.dpi,
-         '-dTextAlphaBits=4', '-dGraphicsAlphaBits=4', '-dEPSFitPage',
-         '-dEPSCrop', '-sDEVICE=pnggray', '-sOutputFile=page.png',
-         'page.eps')
+    call('gs', '-q', '-dBATCH', '-dSAFER', '-dNOPAUSE', '-dDOINTERPOLATE',
+         '-dTextAlphaBits=4', '-dGraphicsAlphaBits=4', '-dUseCropBox',
+         '-r%d' % self.dpi, '-dFirstPage=%d' % n, '-dLastPage=%d' % n,
+         '-sDEVICE=pnggray', '-sOutputFile=page.png', self.input)
 
     if not os.path.exists('page.png'):
       return None
@@ -111,9 +92,8 @@ class DjvuInput(BaseInput):
 
   """ initalise """
   def __init__(self, input, dpi, **args):
-    self.input, self.dpi = input, dpi
+    self.input, self.dpi = os.path.abspath(input), dpi
     self.get_meta_info()
-
 
   """ get meta information from the PDF file """
   def get_meta_info(self):
