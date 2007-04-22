@@ -18,7 +18,7 @@
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ## DEALINGS IN THE SOFTWARE.
 
-import os, sys, subprocess, Image
+import os, sys, subprocess, Image, ImageFilter
 
 ########################################################### CONSTANTS
 
@@ -31,23 +31,25 @@ IMAGENAME_SPEC        = '%d.png'
 ########################################################### COMMANDS
 
 COMMANDS = {
-  'gs'      : False,
-  'pdftk'   : False,
-  'rbmake'  : False,
-  'convert' : False,
-  'pdfinfo' : False,
-  'djvused' : False
+  'gs'        : False,
+  'pdftk'     : False,
+  'rbmake'    : False,
+  'convert'   : False,
+  'pdfinfo'   : False,
+  'djvused'   : False,
+  'tiffcp'    : False,
+  'tiffsplit' : False
 }
 
 ########################################################### PROFILES
 
 PROFILES = {
-  'reb1100'   : {'hres': 315, 'vres':472, 'mode': 'landscape', 'overlap':25, 'rotate':'none', 'colors': 2,  'format': 'rb'  },
-  'eb1150'    : {'hres': 315, 'vres':445, 'mode': 'landscape', 'overlap':25, 'rotate':'left', 'colors': 16, 'format': 'imp2'},
-  'reb1200'   : {'hres': 455, 'vres':595, 'mode': 'landscape', 'overlap':25, 'rotate':'left', 'colors': 16, 'format': 'imp1'},
-  'prs500-l'  : {'hres': 565, 'vres':754, 'mode': 'landscape', 'overlap':25, 'rotate':'left', 'colors': 4,  'format': 'lrf' },
-  'reb1200-p' : {'hres': 455, 'vres':595, 'mode': 'potrait',   'overlap':0,  'rotate':'none', 'colors': 16, 'format': 'imp1'},
-  'prs500'    : {'hres': 565, 'vres':754, 'mode': 'potrait',   'overlap':0,  'rotate':'none', 'colors': 4,  'format': 'lrf' }
+  'reb1100'   : {'hres': 315, 'vres':472, 'mode': 'landscape', 'overlap':25, 'rotate':'none',  'colors': 0,  'format': 'rb'  },
+  'eb1150'    : {'hres': 315, 'vres':445, 'mode': 'landscape', 'overlap':25, 'rotate':'left',  'colors': 16, 'format': 'imp2'},
+  'reb1200'   : {'hres': 455, 'vres':595, 'mode': 'landscape', 'overlap':25, 'rotate':'left',  'colors': 16, 'format': 'imp1'},
+  'reb1200-p' : {'hres': 455, 'vres':595, 'mode': 'potrait',   'overlap':0,  'rotate':'none',  'colors': 16, 'format': 'imp1'},
+  'prs500-l'  : {'hres': 565, 'vres':754, 'mode': 'landscape', 'overlap':25, 'rotate':'right', 'colors': 4,  'format': 'lrf' },
+  'prs500'    : {'hres': 565, 'vres':754, 'mode': 'potrait',   'overlap':0,  'rotate':'none',  'colors': 4,  'format': 'lrf' }
 }
 
 ROTATION = {
@@ -57,6 +59,26 @@ ROTATION = {
 }
 
 ###################################################### BASE CLASSES
+
+## The edge enhancing technique is taken from Philip R. Thompson's "xim"
+## program, which in turn took it from section 6 of "Digital Halftones by
+## Dot Diffusion", D. E. Knuth, ACM Transaction on Graphics Vol. 6, No. 4,
+## October 1987, which in turn got it from two 1976 papers by J. F. Jarvis
+## et. al.
+class EdgeEnhanceFilter(ImageFilter.Kernel):
+  def __init__(self, n):
+    if n < 1 or n > 9:
+      raise ValueError("enhancement parameter incorrect")
+
+    self.name = 'Edge-enhancement'
+    phi    = n / 10.0
+    omphi  = 1.0 - phi
+    x      = -phi/9.0
+
+    self.filterargs = (3,3), omphi, 0.5, [x,    x,    x,
+                                          x,  1+x,    x,
+                                          x,    x,    x]
+
 
 """ superclass for all input formats """
 class BaseInput(object):
@@ -76,18 +98,24 @@ class BaseMode(object):
 class BaseOutput(object):
 
   """ initalise """
-  def __init__(self, output, optimize, colors,
-                      title, author, category, **args):
+  def __init__(self, output, optimize, colors, no_enhance,
+               edge_level, title, author, category, **args):
     self.n       = 0
     self.toc_map = {}
+    self.edge    = None
 
     self.colors, self.optimize, self.output = colors, optimize, output
     self.title, self.author, self.category  = title, author, category
+    if not no_enhance and edge_level in range(1,10):
+      self.edge = edge_level
 
   def add_page(self, page, images):
     p('SAVE ')
     self.toc_map[page] = self.n
     for image in images:
+      if self.edge:
+        image = image.filter( EdgeEnhanceFilter(self.edge) )
+
       hist = image.histogram()
       if sum(hist[:32]) < 10 or sum(hist[224:]) < 10:
         continue
@@ -105,15 +133,13 @@ class BaseOutput(object):
         self.n += 1
 
   def downsample(self, image, filename):
-    image.save('colors.png')
+    image.save('page.png')
     if self.colors == 2:
-      call('convert', 'colors.png', '-colorspace', 'GRAY',
+      call('convert', 'page.png', '-dither',
            '-monochrome', filename)
     else:
-      call('convert', 'colors.png', '-colorspace', 'GRAY',
+      call('convert', 'page.png', '-dither',
            '-colors', str(self.colors), filename)
-
-    rm('colors.png')
 
 
 ########################################################### METHODS

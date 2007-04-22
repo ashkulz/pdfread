@@ -19,7 +19,7 @@
 ## DEALINGS IN THE SOFTWARE.
 
 
-import os, re
+import os, re, glob, Image
 from common import *
 
 
@@ -80,11 +80,7 @@ class PdfInput(BaseInput):
     if not os.path.exists('page.png'):
       return None
 
-    image = Image.open('page.png')
-    image.load()
-    rm('page.png')
-    
-    return image
+    return Image.open('page.png')
 
 
 ########################################################## DJVU INPUT
@@ -99,7 +95,7 @@ class DjvuInput(BaseInput):
     self.input, self.dpi = os.path.abspath(input), dpi
     self.get_meta_info()
 
-  """ get meta information from the PDF file """
+  """ get meta information from the document """
   def get_meta_info(self):
     self.count   = 0
     self.toc     = []
@@ -114,7 +110,7 @@ class DjvuInput(BaseInput):
       self.count = int(raw_input('Please enter number of pages: '))
 
 
-  """ get a page from the DJVU file """
+  """ get a page from the document """
   def get_page(self, n):
 
     call('ddjvu', '-black', '-page', str(n), '-scale', str(self.dpi),
@@ -123,8 +119,81 @@ class DjvuInput(BaseInput):
     if not os.path.exists('page.pbm'):
       return None
 
-    image = Image.open('page.pbm').convert('L')
-    image.load()
-    rm('page.pbm')
-    
-    return image
+    return Image.open('page.pbm').convert('L')
+
+########################################################## TIFF INPUT
+
+
+""" support for the TIFF format """
+class TiffInput(BaseInput):
+  __plugin__ = 'tiff'
+
+  """ initalise """
+  def __init__(self, input, dpi, tempdir, **args):
+    self.input, self.dpi = os.path.abspath(input), dpi
+    self.get_meta_info(tempdir)
+
+  """ get meta information from the document """
+  def get_meta_info(self, tempdir):
+    self.toc     = []
+    self.toc_map = {}
+
+    p('\nExtracting TIFF pages ... ')
+    call('tiffcp', '-c', 'lzw', self.input,
+          os.path.join(tempdir, 'page.tif'))
+
+    call('tiffsplit', os.path.join(tempdir, 'page.tif'),
+          os.path.join(tempdir, 'page_'))
+    p('done.\n')
+
+    self.files = glob.glob(os.path.join(tempdir, 'page_*.tif'))
+    self.files.sort()
+    self.count = len(self.files)
+
+
+  """ get a page from the document """
+  def get_page(self, n):
+    if n < 1 or n > self.count:
+      return None
+
+    return Image.open(self.files[n-1]).convert('L')
+
+
+########################################################## LIST INPUT
+
+
+""" support for a list of images """
+class ImageListInput(BaseInput):
+  __plugin__ = 'imglist'
+
+  """ initalise """
+  def __init__(self, input, tempdir, **args):
+    self.input = os.path.abspath(input)
+    self.load_images()
+
+  """ load the images from the list """
+  def load_images(self):
+    self.toc     = []
+    self.toc_map = {}
+    self.files   = []
+
+    p('\nLoading images ... ')
+    list = file(self.input, 'r')
+    for name in list.readlines():
+      filename = os.path.abspath(name.strip())
+      if filename and os.path.exists(filename):
+        try:
+          image = Image.open(filename).convert('L')
+          self.files.append(image)
+        except:
+          pass
+    self.count = len(self.files)
+
+    p('%d loaded.\n' % self.count)
+
+  """ get a page from the document """
+  def get_page(self, n):
+    if n < 1 or n > self.count:
+      return None
+
+    return self.files[n-1]

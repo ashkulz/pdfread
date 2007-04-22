@@ -22,7 +22,7 @@
 
 ##############################################################################
 
-import os, sys, Image, ImageFilter, ImageChops, ImageOps, optparse
+import os, sys, glob, optparse
 
 
 from common  import *
@@ -34,8 +34,8 @@ OUT_FORMATS = get_plugins(BaseOutput)
 IN_FORMATS  = get_plugins(BaseInput)
 MODES       = get_plugins(BaseMode)
 
-def convert(pages, input, mode, output, edge_level=DEFAULT_EDGE_ENHANCE,
-             no_crop=False, no_dilate=False, no_enhance=False):
+def convert(pages, input, mode_tranform, output,
+            unpaper_args=None, no_crop=False, no_dilate=False):
 
   for page in pages:
     p('Page %4d/%d: %s', page, input.count, 'EXTRACT ')
@@ -44,6 +44,12 @@ def convert(pages, input, mode, output, edge_level=DEFAULT_EDGE_ENHANCE,
     if not image:
       p('BLANK\n')
       continue
+
+    if unpaper_args:
+      image = unpaper(image, unpaper_args)
+      if not image:
+        p('BLANK\n')
+        continue
 
     if not no_crop:
       image = crop(image)
@@ -54,11 +60,12 @@ def convert(pages, input, mode, output, edge_level=DEFAULT_EDGE_ENHANCE,
     if not no_dilate:
       image = dilate(image)
 
-    if not no_enhance:
-      image = edge_enhance(image, edge_level)
-      
-    output.add_page(page, mode(image))
+    output.add_page(page, mode_tranform(image))
     p('DONE\n')
+
+  # remove all temporary files
+  for file in glob.glob('page*.*'):
+    os.remove(file)
 
 def main():
   input, output, mode, options, parser = parse_cmdline()
@@ -77,9 +84,8 @@ def main():
   cwd = os.getcwd()
   os.chdir(options.tempdir)
 
-  convert(pages, input, mode, output,
-          options.edge_level, options.no_crop,
-          options.no_dilate, options.no_enhance)
+  convert(pages, input, mode, output, options.unpaper_args,
+          options.no_crop, options.no_dilate)
 
   delete = output.generate(input.toc)
   os.chdir(cwd)
@@ -100,13 +106,13 @@ def opt_help(list):
 def parse_cmdline():
   profiles = PROFILES.keys()
 
-  parser = optparse.OptionParser(usage='%prog [options] input-pdf')
+  parser = optparse.OptionParser(usage='%prog [options] input-document')
 
   parser.set_defaults(profile=DEFAULT_PROFILE, in_format=DEFAULT_INPUT_FORMAT,
                       dpi=DEFAULT_DPI, edge_level = DEFAULT_EDGE_ENHANCE,
                       title='Unknown', author='Unknown', category='General',
                       colors=None, nosplit=None, count=None,
-                      profile_help=None, profile_dump=None)
+                      profile_help=None, unpaper_args=None)
 
   parser.add_option('-p', dest='profile', choices=profiles, help=opt_help(profiles))
   parser.add_option('-o', dest='output',   help='the output filename')
@@ -118,6 +124,8 @@ def parse_cmdline():
   parser.add_option('-i', dest='in_format',  metavar='FORMAT',
                     choices=IN_FORMATS.keys(),  help=opt_help(IN_FORMATS.keys()))
   parser.add_option('-m', dest='mode', choices=MODES.keys(), help=opt_help(MODES.keys()))
+  parser.add_option('-u', metavar='ARGS', dest='unpaper_args',
+                    help='command line arguments for unpaper')
   parser.add_option('-d', dest='tempdir', metavar='DIR',
                     help='the temporary directory where images are generated')
   parser.add_option('--first-page', metavar='PAGE', type='int', help='first page to convert')

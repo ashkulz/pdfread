@@ -62,7 +62,7 @@
 <em>This assumes you have Ubuntu. If you don't, then install the equivalent
 packages for your distribution.</em>
 <ol>
-<li>Open up a terminal window, and install the following packages:<blockquote>sudo apt-get install pdftk python-imaging xpdf-utils imagemagick gs-common djvulibre-bin</blockquote></li>
+<li>Open up a terminal window, and install the following packages:<blockquote>sudo apt-get install pdftk python-imaging xpdf-utils imagemagick gs-common djvulibre-bin unpaper</blockquote></li>
 <li>Download the <a href="https://sourceforge.net/project/showfiles.php?group_id=87679&package_id=91453">PDFRead source code</a> and extract it somewhere.</li>
 
 <li>The above directory will contain a command line program, execute it via <blockquote>python pdfread.py &lt;options&gt; pdf-file</blockquote></li>
@@ -76,7 +76,7 @@ packages for your distribution.</em>
 <li>Install the <a href="http://developer.apple.com/tools/">Apple developer tools</a>.</li>
 <li>Install the <a href="http://www.python.org/download/">latest python</a> version. The Mac OS X installer application puts a big "MacPython 2.5" folder in your applications folder. Go into that folder and double-click the "Update Shell Profile.command" file.</li>
 <li>Install <a href="http://www.finkproject.org/download/index.php">fink</a> and then install the necessary packages by typing this in the Terminal:
-<blockquote>sudo apt-get install xpdf imagemagick ghostscript ghostscript-fonts</blockquote></li>
+<blockquote>sudo apt-get install xpdf imagemagick ghostscript ghostscript-fonts unpaper</blockquote></li>
 <li>Download the <a href="http://www.pythonware.com/products/pil/">latest Python Imaging Library source</a>, extract it and install it via
 
 <blockquote>sudo python setup.py install</blockquote></li>
@@ -95,8 +95,6 @@ packages for your distribution.</em>
 <li>Use the reb1100 profile, which will always create images in landscape mode. You may have to switch the device to landscape mode.</li>
 <li>If you are on Linux or OS X, you may need to compile and install <a href="http://rbmake.sourceforge.net">rbmake</a>.</li>
 
-<li>Default options for the profile reb1100:<blockquote>
-  rotate=none hres=472 format=rb vres=315 overlap=25</blockquote></li>
 <li>Typical command line usage:<blockquote>pdfread -p reb1100 &lt;pdf-file&gt;</blockquote></li>
 </ul>
 
@@ -113,22 +111,23 @@ packages for your distribution.</em>
   have to create it by either copying the output directory to a Windows machine
   (real or virtual), and then creating an IMP with "ebook.html" in the above
   directory as the source. I recommend that you run Windows in VMWare or equivalent tools.</li>
-<li>Default options for the profile eb1150:<blockquote>rotate=left hres=445 format=imp2 vres=315 overlap=25 colors=16</blockquote></li>
 <li>Typical command line usage:<blockquote>pdfread -p eb1150 &lt;pdf-file&gt;</blockquote></li>
 </ul>
 
-<H3>REB 1200 / Gemstar 2150</H3>
+<H3>REB 1200 / ETI-1 / Gemstar 2150</H3>
 
 <ul>
-<li>Use the reb1200 profile, which will always create images in landscape mode.
-  You will have to hold the device sideways.</li>
+<li>There are two profiles you can use: reb1200 and reb1200-p.<ol>
+  <li>The reb1200 profile rotates the PDF and creates it in landscape mode, which should
+  result in much better legiblity at the expense of splitting up the page.
+   You will have to hold the device sideways.</li>
+  <li>The reb1200-p profile will create images in potrait mode, but this may not look great due to lower resolution of the 1200.</li></ol></li>
+
 <li>If you are on Windows, please install <a href="http://www.ebooktechnologies.com/support_publisher_download.htm">eBook Publisher</a>. Please uninstall and reinstall it if you already have it installed, as there   may be problems if you have installed GEB Librarian after it.</li>
 <li>If you are on Linux or OS X, then an IMP file will not be created. You will
   have to create it by either copying the output directory to a Windows machine
   (real or virtual), and then creating an IMP with "ebook.html" in the above
   directory as the source. I recommend that you run Windows in VMWare or equivalent tools.</li>
-<li>Default options for the profile reb1200:<blockquote>
-  rotate=left hres=595 format=imp1 vres=455 overlap=25</blockquote></li>
 <li>Typical command line usage:<blockquote>pdfread -p reb1200 &lt;pdf-file&gt;</blockquote></li>
 
 </ul>
@@ -136,12 +135,10 @@ packages for your distribution.</em>
 <h3>Sony Reader PRS-500 / Librie</h3>
 
 <ul>
-<li>There are two profiles you can use: prs500 and prs500-l.<ol>
-  <li>The prs500 profile creates a typical LRF in potrait mode. Default options for the profile prs500:<blockquote>
-  rotate=none hres=565 format=lrf vres=754 nosplit=1 colors=4</blockquote></li><li>The prs500-l
-  profile rotates the PDF and creates it in landscape mode, which should
-  result in much better legiblity at the expense of splitting up the page. Default options for the profile prs500-l:<blockquote>
-  rotate=left hres=754 format=lrf vres=565 overlap=25 colors=4</blockquote></li></ol></li>
+<li>There are two profiles you can use:<ol>
+  <li>The prs500 profile creates a typical LRF in potrait mode.</li>
+  <li>The prs500-l profile rotates the PDF and creates it in landscape mode, which should
+  result in much better legiblity at the expense of splitting up the page.</li></ol></li>
 
 <li>Typical command line usage:<blockquote>pdfread -p prs500 &lt;pdf-file&gt;</blockquote></li>
 </ul>
@@ -149,29 +146,37 @@ packages for your distribution.</em>
 <h2 id="options">Command Line Options</h2>
 
 <pre>
-Usage: pdfread [options] input-pdf
+Usage: pdfread [options] input-document
 
 Options:
   -h, --help          show this help message and exit
-  -p PROFILE          one of: eb1150, prs500, reb1200, reb1100, prs500-l
-  -o OUTPUT           the output eBook filename
-  -t TITLE            the title for the generated ebook
-  -a AUTHOR           the author for the generated ebook
-  -c CATEGORY         the category for the generated ebook
+  -p PROFILE          one of: reb1200, prs500-l, eb1150, reb1200-p, prs500,
+                      reb1100
+  -o OUTPUT           the output filename
+  -t TITLE            generated ebook title (default: "Unknown")
+  -a AUTHOR           generated ebook author (default: "Unknown")
+  -c CATEGORY         generated ebook category (default: "General")
   -f FORMAT           one of: imp2, imp1, html, rb, lrf
-  -i FORMAT           one of: pdf, djvu
+  -i FORMAT           one of: pdf, imglist, djvu, tiff
+  -m MODE             one of: landscape, potrait
+  -u ARGS             command line arguments for unpaper
   -d DIR              the temporary directory where images are generated
+  --first-page=PAGE   first page to convert
+  --last-page=PAGE    last page to convert
+  --optimize          optimize generated PNG images
+  --edge-level=L      edge enhancement level from 1-9 (default: 5)
   --dpi=DPI           the DPI at which to perform dilation (default: 300)
-  --autocontrast=N    normalize image contrast for N percent (default: 5)
-  --gscrop            perform extra cropping using ghostscript
   --colors=N          downsample the output image to N grayscale colors
-  --nosplit           do not split up pages
-  --rotate=DIRECTION  one of: none, left, or right
-  --pages=N           consider that the document has N pages
+  --mono              downsample the output image to monochrome
+  --rotate=DIRECTION  one of: none, right, left
+  --count=N           consider that the document has N pages
   --hres=HRES         the maximum usable horizontal resolution
   --vres=VRES         the maximum usable vertical resolution
   --overlap=OVERLAP   screen overlap between pages (in pixels)
-  --help-profiles     show the various profile settings
+  --no-crop           disable the cropping stage
+  --no-dilate         disable the dilation stage
+  --no-enhance        disable the edge enhancement stage
+  --list-profiles     show the various profiles and their settings
 </pre>
 
 
@@ -181,7 +186,17 @@ Options:
 
 <h3>[2007-04-xx] v6</h3>
 <ul>
+<li>add support for TIFF and a list of page images for input.</li>
+<li>add <a href="http://unpaper.berlios.de">unpaper</a> support for image cleanup.</li>
+<li>removed the autocontrast feature, as unpaper does a much better job at it.</li>
+<li>added an edge-enhancement filter, similiar to rbmake and RasterFarian.</li>
+<li>allow all processing stages to be selectively disabled.</li>
+<li>allow a page range to be specified for conversion (via --first-page and --last-page).</li>
+<li>tweak the prs-500 profile to rotate right instead of left (thanks gdxf)</li>
+<li>add an optional step to optimize generated PNG images via <a href="http://optipng.sourceforge.net/">OptiPNG</a>.</li>
 <li>fix problem where the IMP file was not created if the latest <a href="http://www.ebooktechnologies.com/support_publisher_download.htm">eBook Publisher</a> was not installed.</li>
+<li>complete overhaul of the code for better maintainability.</li>
+
 </ul>
 
 <h3>[2007-04-06] v5</h3>

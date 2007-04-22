@@ -93,7 +93,7 @@ class RocketBookOutput(HtmlOutput):
 
     if COMMANDS['rbmake']:
       p('\nCreating Rocket eBook ... ')
-      call('rbmake', '-beio', 'ebook.rb', 'ebook.html')
+      call('rbmake', '-bei', '-Enone', '-o', 'ebook.rb', 'ebook.html')
       p('done.\n')
 
       if self.output:

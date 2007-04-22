@@ -24,26 +24,6 @@ import os, sys, math, Image, ImageFilter, ImageChops, ImageOps
 from common import *
 
 
-## The edge enhancing technique is taken from Philip R. Thompson's "xim"
-## program, which in turn took it from section 6 of "Digital Halftones by
-## Dot Diffusion", D. E. Knuth, ACM Transaction on Graphics Vol. 6, No. 4,
-## October 1987, which in turn got it from two 1976 papers by J. F. Jarvis
-## et. al.
-class EdgeEnhanceFilter(ImageFilter.Kernel):
-  def __init__(self, n):
-    if n < 1 or n > 9:
-      raise ValueError("enhancement parameter incorrect")
-
-    self.name = 'Edge-enhancement'
-    phi    = n / 10.0
-    omphi  = 1.0 - phi
-    x      = -phi/9.0
-
-    self.filterargs = (3,3), omphi, 0.5, [x,    x,    x,
-                                          x,  1+x,    x,
-                                          x,    x,    x]
-
-
 ########################################################### PROCESSING
 
 """ perform image cropping via whitespace detection at the borders """
@@ -60,10 +40,17 @@ def dilate(image):
   p('DILATE ')
   return image.filter(ImageFilter.MinFilter)
 
-""" perform edge enhancement """
-def edge_enhance(image, n):
-  p('ENHANCE ')
-  return image.filter( EdgeEnhanceFilter(n) )
+""" perform unpaper cleanup """
+def unpaper(image, args):
+  p('UNPAPER ')
+  rm('page_i.pgm', 'page_o.pgm')
+  image.save('page_i.pgm')
+  cmd = ['unpaper', '--overwrite'] + args.split() + ['page_i.pgm', 'page_o.pgm']
+  call(*cmd)
+  if not os.path.exists('page_o.pgm'):
+    return None
+
+  return Image.open('page_o.pgm')
 
 ##############################################################################
 
@@ -116,7 +103,7 @@ class LandscapeMode(BaseMode):
     # determine the height which will maintain aspect ratio
     height = int(float(self.vres) / image.size[0] * image.size[1])
     final  = image.resize((self.vres, height), Image.ANTIALIAS)
-    
+
     # split it up into multiple landscape pages
     completed = 0
     while completed + self.overlap < height:
