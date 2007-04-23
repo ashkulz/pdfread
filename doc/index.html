@@ -62,7 +62,7 @@
 <em>This assumes you have Ubuntu. If you don't, then install the equivalent
 packages for your distribution.</em>
 <ol>
-<li>Open up a terminal window, and install the following packages:<blockquote>sudo apt-get install pdftk python-imaging xpdf-utils imagemagick gs-common djvulibre-bin unpaper</blockquote></li>
+<li>Open up a terminal window, and install the following packages:<blockquote>sudo apt-get install pdftk python-imaging imagemagick gs-common djvulibre-bin libtiff-tools unpaper</blockquote></li>
 <li>Download the <a href="https://sourceforge.net/project/showfiles.php?group_id=87679&package_id=91453">PDFRead source code</a> and extract it somewhere.</li>
 
 <li>The above directory will contain a command line program, execute it via <blockquote>python pdfread.py &lt;options&gt; pdf-file</blockquote></li>
@@ -75,8 +75,9 @@ packages for your distribution.</em>
 
 <li>Install the <a href="http://developer.apple.com/tools/">Apple developer tools</a>.</li>
 <li>Install the <a href="http://www.python.org/download/">latest python</a> version. The Mac OS X installer application puts a big "MacPython 2.5" folder in your applications folder. Go into that folder and double-click the "Update Shell Profile.command" file.</li>
+<li>Install <a href="http://www.pdfhacks.com/pdftk/#packages">pdftk</a>.</li>
 <li>Install <a href="http://www.finkproject.org/download/index.php">fink</a> and then install the necessary packages by typing this in the Terminal:
-<blockquote>sudo apt-get install xpdf imagemagick ghostscript ghostscript-fonts unpaper</blockquote></li>
+<blockquote>sudo apt-get install imagemagick ghostscript ghostscript-fonts libtiff-bin djvulibre</blockquote></li>
 <li>Download the <a href="http://www.pythonware.com/products/pil/">latest Python Imaging Library source</a>, extract it and install it via
 
 <blockquote>sudo python setup.py install</blockquote></li>
@@ -188,7 +189,7 @@ Options:
 <ul>
 <li>add support for TIFF and a list of page images for input.</li>
 <li>add <a href="http://unpaper.berlios.de">unpaper</a> support for image cleanup.</li>
-<li>removed the autocontrast feature, as unpaper does a much better job at it.</li>
+<li>removed the autocontrast and ghostscript cropping features.</li>
 <li>added an edge-enhancement filter, similiar to rbmake and RasterFarian.</li>
 <li>allow all processing stages to be selectively disabled.</li>
 <li>allow a page range to be specified for conversion (via --first-page and --last-page).</li>
