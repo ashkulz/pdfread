@@ -106,7 +106,7 @@ class DjvuInput(BaseInput):
 
     # if nothing found, ask the user for the information
     if not self.count:
-      p('Unable to determine total number of pages in document')
+      p('Unable to determine total number of pages in document\n')
       self.count = int(raw_input('Please enter number of pages: '))
 
 

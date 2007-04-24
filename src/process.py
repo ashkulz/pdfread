@@ -26,14 +26,76 @@ from common import *
 
 ########################################################### PROCESSING
 
-""" perform image cropping via whitespace detection at the borders """
-def crop(image):
+MAX_CROP_SIZE = 100
+MAX_CROP_STEP = 10
+
+""" internal function for cropping a single axis """
+def crop_axis(input, img, start, end, percent,
+              func_crop, func_size, func_pos):
+
+  # compute optimal step and size for given axis percentage
+  size = min(MAX_CROP_SIZE,  max(1, int((end-start)*percent/100)))
+  step = min(MAX_CROP_STEP,  max(1, int(size/10)))
+
+  content    = []
+  begin      = start
+  blank_area = False
+  for i in range(start, end, step):
+    test = img.crop( func_crop(i, i+size) )
+    if test.getbbox() is None:
+      if not blank_area:
+        # we've hit a blank area, so save content area
+        content.append( (begin, i) )
+        blank_area = True
+    else:
+      if blank_area:
+        # we've moved out of a blank area, mark beginning
+        begin = i
+        blank_area = False
+
+  # handle the last leftover area
+  if not blank_area and end > begin:
+    content.append( (begin, end) )
+
+  # create image with shrunken axis
+  newI   = sum([last-first for first, last in content])
+  output = Image.new('L', func_size(newI), None)
+
+  # append the content parts
+  i = 0
+  for first, last in content:
+    output.paste( input.crop(func_crop(first, last)), func_pos(i) )
+    i += (last - first)
+
+  # return output
+  return output
+
+
+""" perform image cropping via whitespace detection """
+def crop(input, percent=DEFAULT_CROP_PERCENT):
   p('CROP ')
-  bbox = ImageChops.invert(image).getbbox()
-  if bbox is None:
+  w, h = input.size
+  img  = ImageChops.invert(input)
+  box  = img.getbbox()
+  if box is None:
     return None
 
-  return image.crop(bbox)
+  l, t, r, b = box
+
+  # crop horizontal blank areas
+  temp = crop_axis(input, img, t, b, percent,
+                   lambda s, e: (0, s, w, e),
+                   lambda s   : (w, s),
+                   lambda s   : (0, s))
+
+  w, h = temp.size
+  img  = ImageChops.invert(temp)
+
+  # crop vertical blank areas
+  return crop_axis(temp, img, l, r, percent,
+                   lambda s, e: (s, 0, e, h),
+                   lambda s   : (s, h),
+                   lambda s   : (s, 0))
 
 """ perform image dilation """
 def dilate(image):

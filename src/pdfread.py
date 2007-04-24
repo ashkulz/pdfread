@@ -34,7 +34,7 @@ OUT_FORMATS = get_plugins(BaseOutput)
 IN_FORMATS  = get_plugins(BaseInput)
 MODES       = get_plugins(BaseMode)
 
-def convert(pages, input, mode_tranform, output,
+def convert(pages, input, mode_tranform, output, crop_percent,
             unpaper_args=None, no_crop=False, no_dilate=False):
 
   for page in pages:
@@ -52,7 +52,7 @@ def convert(pages, input, mode_tranform, output,
         continue
 
     if not no_crop:
-      image = crop(image)
+      image = crop(image, crop_percent)
       if not image:
         p('BLANK\n')
         continue
@@ -84,8 +84,8 @@ def main():
   cwd = os.getcwd()
   os.chdir(options.tempdir)
 
-  convert(pages, input, mode, output, options.unpaper_args,
-          options.no_crop, options.no_dilate)
+  convert(pages, input, mode, output, options.crop_percent,
+          options.unpaper_args, options.no_crop, options.no_dilate)
 
   delete = output.generate(input.toc)
   os.chdir(cwd)
@@ -110,9 +110,8 @@ def parse_cmdline():
 
   parser.set_defaults(profile=DEFAULT_PROFILE, in_format=DEFAULT_INPUT_FORMAT,
                       dpi=DEFAULT_DPI, edge_level = DEFAULT_EDGE_ENHANCE,
-                      title='Unknown', author='Unknown', category='General',
-                      colors=None, nosplit=None, count=None,
-                      profile_help=None, unpaper_args=None)
+                      crop_percent=DEFAULT_CROP_PERCENT,
+                      title='Unknown', author='Unknown', category='General')
 
   parser.add_option('-p', dest='profile', choices=profiles, help=opt_help(profiles))
   parser.add_option('-o', dest='output',   help='the output filename')
@@ -131,6 +130,7 @@ def parse_cmdline():
   parser.add_option('--first-page', metavar='PAGE', type='int', help='first page to convert')
   parser.add_option('--last-page', metavar='PAGE', type='int',  help='last page to convert')
   parser.add_option('--optimize', action='store_true', help='optimize generated PNG images')
+  parser.add_option('--crop-percent', type='float', metavar='N%', help='whitespace cropping percentage (default: %default%)')
   parser.add_option('--edge-level', type='int', metavar='L', help='edge enhancement level from 1-9 (default: %default)')
   parser.add_option('--dpi', type='int',
                     help='the DPI at which to perform dilation (default: %default)')

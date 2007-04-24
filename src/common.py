@@ -26,6 +26,7 @@ DEFAULT_PROFILE       = 'reb1100'
 DEFAULT_INPUT_FORMAT  = 'pdf'
 DEFAULT_DPI           = 300
 DEFAULT_EDGE_ENHANCE  = 5
+DEFAULT_CROP_PERCENT  = 2.0
 IMAGENAME_SPEC        = '%d.png'
 
 ########################################################### COMMANDS
