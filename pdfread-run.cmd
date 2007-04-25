@@ -4,6 +4,11 @@ set GS_LIB=%~dp0gs8.54\lib;%~dp0gs8.54\fonts
 set MAGICK_CONFIGURE_PATH=%~dp0bin\imagemagick
 if '%1' == '' goto shell
 title PDFRead Conversion
+echo Command Line
+echo ============
+echo.
+echo "%~dp0bin\pdfread" %*
+echo.
 "%~dp0bin\pdfread" %*
 pause
 exit /b %errorlevel%

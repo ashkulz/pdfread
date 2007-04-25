@@ -66,7 +66,7 @@ class HtmlOutput(BaseOutput):
   <meta name="category" content="%(category)s">
  </head>
  <body>
-   <h1 align="center">%(title)s</h1>
+   <h1 align="center" style="page-break-after: always">%(title)s</h1>
    %(toc)s""" % dict(title=self.title, author=self.author,
                      category=self.category, toc=self.toc_text(toc))
 

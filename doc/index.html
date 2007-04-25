@@ -18,7 +18,7 @@
 
 <td style='border: 1px solid'><a href="#install">Install</a></td>
 <td style='border: 1px solid'><a href="#device">Device Support</a></td>
-<td style='border: 1px solid'><a href="#options">Command Line Options</a></td>
+<td style='border: 1px solid'><a href="#options">Command Line</a></td>
 <td style='border: 1px solid'><a href="#changes">Changelog</a></td>
 </tr></table>
 
@@ -62,7 +62,7 @@
 <em>This assumes you have Ubuntu. If you don't, then install the equivalent
 packages for your distribution.</em>
 <ol>
-<li>Open up a terminal window, and install the following packages:<blockquote>sudo apt-get install pdftk python-imaging imagemagick gs-common djvulibre-bin libtiff-tools unpaper</blockquote></li>
+<li>Open up a terminal window, and install the following packages:<blockquote>sudo apt-get install pdftk python-imaging imagemagick gs-common djvulibre-bin libtiff-tools unpaper optipng</blockquote></li>
 <li>Download the <a href="https://sourceforge.net/project/showfiles.php?group_id=87679&package_id=91453">PDFRead source code</a> and extract it somewhere.</li>
 
 <li>The above directory will contain a command line program, execute it via <blockquote>python pdfread.py &lt;options&gt; pdf-file</blockquote></li>
@@ -77,9 +77,8 @@ packages for your distribution.</em>
 <li>Install the <a href="http://www.python.org/download/">latest python</a> version. The Mac OS X installer application puts a big "MacPython 2.5" folder in your applications folder. Go into that folder and double-click the "Update Shell Profile.command" file.</li>
 <li>Install <a href="http://www.pdfhacks.com/pdftk/#packages">pdftk</a>.</li>
 <li>Install <a href="http://www.finkproject.org/download/index.php">fink</a> and then install the necessary packages by typing this in the Terminal:
-<blockquote>sudo apt-get install imagemagick ghostscript ghostscript-fonts libtiff-bin djvulibre</blockquote></li>
+<blockquote>sudo apt-get install imagemagick ghostscript ghostscript-fonts libtiff-bin djvulibre optipng</blockquote></li>
 <li>Download the <a href="http://www.pythonware.com/products/pil/">latest Python Imaging Library source</a>, extract it and install it via
-
 <blockquote>sudo python setup.py install</blockquote></li>
 <li>In case you want to convert DJVU documents, please install <a href="http://pdb.finkproject.org/pdb/package.php/djvulibre">djvulibre from Fink</a> or install it yourself.</li>
 <li>Download the <a href="https://sourceforge.net/project/showfiles.php?group_id=87679&package_id=91453">PDFRead source code</a> and extract it somewhere.</li>
@@ -165,6 +164,7 @@ Options:
   --first-page=PAGE   first page to convert
   --last-page=PAGE    last page to convert
   --optimize          optimize generated PNG images
+  --crop-percent=N%   whitespace cropping percentage (default: 2.0%)
   --edge-level=L      edge enhancement level from 1-9 (default: 5)
   --dpi=DPI           the DPI at which to perform dilation (default: 300)
   --colors=N          downsample the output image to N grayscale colors
@@ -185,17 +185,19 @@ Options:
 
 <H2 id="changes">Changelog</H2>
 
-<h3>[2007-04-xx] v6</h3>
+<h3>[2007-04-25] 1.6</h3>
 <ul>
+<li>revamped the Windows GUI: added tooltips, preview feature and show the command line options when executed (useful for batch execution).</li>
 <li>add support for TIFF and a list of page images for input.</li>
 <li>add <a href="http://unpaper.berlios.de">unpaper</a> support for image cleanup.</li>
-<li>add extremely agressive whitespace detection, even in the middle of the page.</li>
+<li>add extremely agressive whitespace detection, even in the middle of the page text.</li>
 <li>added an edge-enhancement filter, similiar to rbmake and RasterFarian.</li>
 <li>allow all processing stages to be selectively disabled.</li>
-<li>allow a page range to be specified for conversion (via --first-page and --last-page).</li>
+<li>allow a page range to be specified for conversion.</li>
 <li>tweak the prs-500 profile to rotate right instead of left (thanks gdxf)</li>
 <li>add an optional step to optimize generated PNG images via <a href="http://optipng.sourceforge.net/">OptiPNG</a>.</li>
-<li>removed the autocontrast and ghostscript cropping features (no longer needed/useful).</li>
+<li>removed the dependency on xpdf.</li>
+<li>removed the autocontrast and ghostscript cropping features (no longer useful).</li>
 <li>fix problem where the IMP file was not created if the latest <a href="http://www.ebooktechnologies.com/support_publisher_download.htm">eBook Publisher</a> was not installed.</li>
 <li>complete overhaul of the code for better maintainability.</li>
 

@@ -30,128 +30,119 @@ InstallButtonText "Convert"
 AutoCloseWindow true
 BrandingText "${GUI}"
 Caption "${GUI}"
-MiscButtonText '<  Back' 'Convert'
 
 ;--------------------------------
 ;Pages
 
-Page custom GetParams
-Page custom GetCustomParams
+Page custom GetConversionParameters
 
 !insertmacro MUI_PAGE_INSTFILES
   
 !insertmacro MUI_LANGUAGE "English"
 
 ReserveFile "pdfread-gui.ini"
-ReserveFile "pdfread-gui-custom.ini"
 !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 
 ;--------------------------------
 ;Installer Sections
 
 Section "Main Section"
-  !insertmacro MUI_INSTALLOPTIONS_READ $R3 "pdfread-gui.ini" "Field 3" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ $R4 "pdfread-gui.ini" "Field 4" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ $R5 "pdfread-gui.ini" "Field 5" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ $R6 "pdfread-gui.ini" "Field 6" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ $R7 "pdfread-gui.ini" "Field 7" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ $R8 "pdfread-gui.ini" "Field 8" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ $R9 "pdfread-gui.ini" "Field 9" "State"
-  
-  StrCpy $R2 '-i $R4 -p $R5 -t "$R6"'
-  StrCmp $R7 "" skip_author
-  StrCpy $R2 '$R2 -a "$R7"'
-skip_author:
-  StrCmp $R7 "" skip_category
-  StrCpy $R2 '$R2 -c "$R8"'
-skip_category:
-  StrCmp $R9 "" skip_output
-  StrCpy $R2 '$R2 -o "$R9"'
-skip_output:
-  ReadIniStr $R1 "$PLUGINSDIR\option.ini" "config" "commandline"
-  Exec '"$EXEDIR\pdfread-run.cmd" $R2 $R1 "$R3"'
 SectionEnd
 
-!macro ConfOption iscust optsect optval field item
-  ReadIniStr  $R9 "$PLUGINSDIR\options.ini" "${optsect}" "${optval}"
-  WriteIniStr "$PLUGINSDIR\pdfread-gui${iscust}.ini" "Field ${field}" "${item}" $R9
+!macro OptionalParam num param
+  !insertmacro MUI_INSTALLOPTIONS_READ $R9 "pdfread-gui.ini" "Field ${num}" "State"
+  Strcmp $R9 "" +2
+  StrCpy $R2 '$R2 ${param} "$R9"'
 !macroend
 
-!macro CustomParam option field
-  ReadIniStr $R9 "$PLUGINSDIR\pdfread-gui.ini" "Field 5" "State"
-  ReadIniStr $R8 "$PLUGINSDIR\options.ini" "$R9" "${option}"
-  ReadIniStr $R7 "$PLUGINSDIR\pdfread-gui-custom.ini" "Field ${field}" "State"
-  
-  StrCmp $R7 $R8 +2
-  StrCpy $R2 '$R2 --${option} $R7'
+!macro DefaultParam num param def
+  !insertmacro MUI_INSTALLOPTIONS_READ $R9 "pdfread-gui.ini" "Field ${num}" "State"
+  Strcmp $R9 "" +3
+  Strcmp $R9 "${def}" +2
+  StrCpy $R2 '$R2 ${param} "$R9"'
 !macroend
 
-;--------------------------------
-;Installer Functions
+!macro Flag num name
+  !insertmacro MUI_INSTALLOPTIONS_READ $R9 "pdfread-gui.ini" "Field ${num}" "State"
+  IntCmpU $R9 0 +2
+  StrCpy $R2 '$R2 ${name}'
+!macroend
+
+!macro Tip num tooltip
+  FindWindow $3 "#32770" "" $HWNDPARENT
+  IntOp $5 1199 + ${num}
+  GetDlgItem $1 $3 $5
+  ToolTips::Modern $1 0 "" "${tooltip}"
+!macroend
 
 Function .onInit
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "pdfread-gui.ini"
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "pdfread-gui-custom.ini"
 
   Call GetParameters
   Pop  $R0
-  StrCmp $R0 "" options
-  IfFileExists $R0 0 options
+  StrCmp $R0 "" skip
+  IfFileExists $R0 0 skip
   !insertmacro MUI_INSTALLOPTIONS_WRITE "pdfread-gui.ini" "Field 3" "State" $R0
-options:
-  nsExec::ExecToLog '"$EXEDIR\bin\pdfread.exe" --dump-profiles "$PLUGINSDIR\options.ini"'
-  IfFileExists "$PLUGINSDIR\options.ini" 0 skip
-
-  !insertmacro ConfOption '' 'config' 'formats'         '4' 'ListItems'
-  !insertmacro ConfOption '' 'config' 'default_format'  '4' 'State'
-  !insertmacro ConfOption '' 'config' 'profiles'        '5' 'ListItems'
-  !insertmacro ConfOption '' 'config' 'default_profile' '5' 'State'
-  
-  !insertmacro ConfOption '-custom' 'config' 'dpi'          '3' 'State'
-  !insertmacro ConfOption '-custom' 'config' 'autocontrast' '4' 'State'
-  !insertmacro ConfOption '-custom' 'config' 'rotation'     '8' 'ListItems'
 skip:
 FunctionEnd
 
-Function GetParams
+Function GetConversionParameters
+start:
   !insertmacro MUI_HEADER_TEXT "${GUI}" "Please enter the conversion details."
-  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "pdfread-gui.ini"
+  !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "pdfread-gui.ini"
+  ; tooltips
+  !insertmacro Tip 3 "This is the file that you want to use for conversion."
+  !insertmacro Tip 5 "Input document format."
+  !insertmacro Tip 6 "Title of the generated eBook"
+  !insertmacro Tip 7 "Author of the generated eBook"
+  !insertmacro Tip 8 "Category of the generated eBook"
+  !insertmacro Tip 9 "The output filename (you will have to enter appropriate file extension)"
+  !insertmacro Tip 11 "Choose this if you don't want PDFRead to close after starting conversion."
+  !insertmacro Tip 12 "Profile to use during conversion"
+  !insertmacro Tip 13 "Disable the cropping stage during conversion"
+  !insertmacro Tip 14 "Disable the image dilation stage during conversion"
+  !insertmacro Tip 15 "Disable the edge enhancement stage during conversion"
+  !insertmacro Tip 16 "Start conversion from this page"
+  !insertmacro Tip 17 "End conversion at this page"
+  !insertmacro Tip 18 "All whitespace areas larger than this percentage will be cropped. Reduce if you want more aggressive cropping."
+  !insertmacro Tip 19 "Each page will be rendered at this DPI for dilation. Increase this to reduce the dilation effect."
+  !insertmacro Tip 20 "Edge enhacement level. Increase for more sharper text, decrease for more smoother text."
+  !insertmacro Tip 21 "The command line arguments to pass to unpaper"
+  !insertmacro Tip 22 "Each generated PNG will be optimized for maximum compression (can take some time)"
+  !insertmacro MUI_INSTALLOPTIONS_SHOW
+  StrCmp $MUI_TEMP1 "cancel" finish
 
-FunctionEnd
 
-Function GetCustomParams
-  StrCpy $R2 ""
+  !insertmacro MUI_INSTALLOPTIONS_READ $R3 "pdfread-gui.ini" "Field 4" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $R4 "pdfread-gui.ini" "Field 5" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $R5 "pdfread-gui.ini" "Field 10" "State"
 
-  ReadIniStr $R0 "$PLUGINSDIR\pdfread-gui.ini" "Field 10" "State"
-  IntCmp $R0 0 skip_custom
+  StrCpy $R2 '-p $R5 -i $R3 -t "$R4" '
+  !insertmacro OptionalParam 6 '-a'
+  !insertmacro OptionalParam 7 '-c'
+  !insertmacro OptionalParam 8 '-o'
   
-  ReadIniStr $R1 "$PLUGINSDIR\pdfread-gui.ini" "Field 5" "State"
+  !insertmacro OptionalParam 14 '--first-page'
+  !insertmacro OptionalParam 15 '--last-page'
   
-  IfFileExists "$PLUGINSDIR\options.ini" 0 display
-  !insertmacro ConfOption '-custom' '$R1' 'hres'    '6'  'State'
-  !insertmacro ConfOption '-custom' '$R1' 'vres'    '7'  'State'
-  !insertmacro ConfOption '-custom' '$R1' 'rotate'  '8'  'State'
-  !insertmacro ConfOption '-custom' '$R1' 'colors'  '9'  'State'
-  !insertmacro ConfOption '-custom' '$R1' 'overlap' '10' 'State'
-  !insertmacro ConfOption '-custom' '$R1' 'nosplit' '11' 'State'
-display:
+  !insertmacro Flag 11 '--no-crop'
+  !insertmacro Flag 12 '--no-dilate'
+  !insertmacro Flag 13 '--no-enhance'
+  !insertmacro Flag 20 '--optimize'
+  
+  !insertmacro DefaultParam 16 '--crop-percent' '2.0'
+  !insertmacro DefaultParam 17 '--dpi' '300'
+  !insertmacro DefaultParam 18 '--edge-level' '5'
+  
+  !insertmacro OptionalParam 19 '-u'
+  
+  !insertmacro MUI_INSTALLOPTIONS_READ $R3 "pdfread-gui.ini" "Field 3" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $R4 "pdfread-gui.ini" "Field 9" "State"
+  Strcpy $R2 '$R2 "$R3"'
+  Exec '"$EXEDIR\pdfread-run.cmd" $R2'
+  IntCmpU $R4 1 start
+finish:
 
-  !insertmacro MUI_HEADER_TEXT "${GUI}" "Please enter the custom parameters."
-  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "pdfread-gui-custom.ini"
-  
-  ; create the custom parameter command line
-  !insertmacro CustomParam 'hres'    '6'
-  !insertmacro CustomParam 'vres'    '7'
-  !insertmacro CustomParam 'rotate'  '8'
-  !insertmacro CustomParam 'colors'  '9'
-  !insertmacro CustomParam 'overlap' '10'
-  
-  ReadIniStr $R9 "$PLUGINSDIR\pdfread-gui-custom.ini" "Field 11" "State"
-  IntCmp $R9 0 skip_custom
-  StrCpy $R2 '$R2 --nosplit '
-  
-skip_custom:
-  WriteIniStr "$PLUGINSDIR\option.ini" "config" "commandline" $R2
 FunctionEnd
 
 Function GetParameters

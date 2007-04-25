@@ -180,6 +180,8 @@ class ImageListInput(BaseInput):
     p('\nLoading images ... ')
     list = file(self.input, 'r')
     for name in list.readlines():
+      if not name.strip():
+        continue
       filename = os.path.abspath(name.strip())
       if filename and os.path.exists(filename):
         try:
