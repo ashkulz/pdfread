@@ -18,7 +18,7 @@
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ## DEALINGS IN THE SOFTWARE.
 
-import os, sys, subprocess, Image, ImageFilter
+import os, sys, shutil, subprocess, Image, ImageFilter
 
 ########################################################### CONSTANTS
 
@@ -142,6 +142,17 @@ class BaseOutput(object):
       call('convert', 'page.png', '-dither',
            '-colors', str(self.colors), filename)
 
+  def move_output(self, ext):
+    fname = self.output
+
+    if not fname or not os.path.exists('ebook.%s' % ext):
+      return False
+
+    if not fname.endswith(ext):
+      fname += '.%s' % ext
+
+    shutil.move('ebook.%s' % ext, fname)
+    return True
 
 ########################################################### METHODS
 

@@ -179,3 +179,37 @@ class LandscapeMode(BaseMode):
       completed = completed + self.hres - self.overlap
 
     return output
+
+
+##############################################################################
+
+
+""" landscape mode with only two pages """
+class LandscapeHalfMode(BaseMode):
+  __plugin__ = 'landscape-half'
+
+  """ initialise """
+  def __init__(self, hres, vres, overlap, rotate, **args):
+    self.hres, self.vres, self.overlap = hres, vres, overlap
+    self.rotate = ROTATION[rotate]
+
+  """ execute """
+  def __call__(self, image):
+    p('SPLIT ')
+    output = []
+
+    # find the ratios
+    imgH, imgV = image.size
+    ratioH     = float(self.vres)/imgH
+    ratioV     = float(self.hres * 2 - self.overlap)/imgV
+
+    ratio  = min(ratioH, ratioV)
+    size   = ( int(imgH*ratio), int(imgV*ratio) )
+    output = image.resize(size, Image.ANTIALIAS)
+
+    if size[1] <= self.hres:
+      return [ output ]
+
+    # need to split it up
+    return [ output.crop((0, 0, size[0], self.hres)),
+             output.crop((0, self.hres - self.overlap, size[0], size[1])) ]

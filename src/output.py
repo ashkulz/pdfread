@@ -19,7 +19,7 @@
 ## DEALINGS IN THE SOFTWARE.
 
 
-import os, sys, shutil, traceback
+import os, sys, traceback
 
 from common import *
 
@@ -96,11 +96,7 @@ class RocketBookOutput(HtmlOutput):
       call('rbmake', '-bei', '-Enone', '-o', 'ebook.rb', 'ebook.html')
       p('done.\n')
 
-      if self.output:
-        shutil.move('ebook.rb', self.output)
-        return True
-
-    return False
+    return self.move_output('rb')
 
 
 ########################################################### IMP OUTPUT
@@ -149,20 +145,17 @@ class ImpOutput(HtmlOutput):
 
       p('done.\n')
 
-      if self.output:
-        shutil.move('ebook.imp', self.output)
-        return True
-
     except:
       print 'failed, error details follow.\n'
       traceback.print_exc(file=sys.stdout)
 
-    return False
+    return self.move_output('imp')
+
 
 """ support for IMP output for the FullVga profile """
 class FullVgaImpOutput(ImpOutput):
   __plugin__ = 'imp1'
-  
+
   def generate(self, toc):
     self.generate_imp(toc, 1)
 
@@ -212,12 +205,8 @@ class LrfOutput(BaseOutput):
       book.addTocEntry(title.strip(), images[imagenum])
 
     # generate the ebook
-    book.renderLrs("ebook.lrs")
     book.renderLrf("ebook.lrf")
 
     p('done.\n')
-    if self.output:
-      shutil.move('ebook.lrf', self.output)
-      return True
 
-    return False
+    return self.move_output('lrf')
