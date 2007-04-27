@@ -40,6 +40,9 @@ class HtmlOutput(BaseOutput):
     for title_, level_, page_ in toc:
       title, level, page = title_.strip(), int(level_), int(page_)
 
+      if not toc_map.has_key(page):
+        continue
+
       if level > current:
         current = level
         toc_text += '<ul>'
@@ -201,8 +204,9 @@ class LrfOutput(BaseOutput):
     # generate TOC, if present
     toc_map = self.toc_map
     for title, level, page_ in toc:
-      imagenum = toc_map[int(page_)]
-      book.addTocEntry(title.strip(), images[imagenum])
+      if toc_map.has_key(int(page_)):
+        imagenum = toc_map[int(page_)]
+        book.addTocEntry(title.strip(), images[imagenum])
 
     # generate the ebook
     book.renderLrf("ebook.lrf")
