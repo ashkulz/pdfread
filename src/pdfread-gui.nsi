@@ -23,7 +23,7 @@
 ;--------------------------------
 ;General
 
-!define GUI "PDFRead ${VERSION}"
+!define GUI "PDFRead GUI ${VERSION}"
 Name    "${GUI}"
 OutFile "..\pdfread-gui.exe"
 InstallButtonText "Convert"
@@ -97,7 +97,7 @@ start:
   !insertmacro Tip 7 "Author of the generated eBook"
   !insertmacro Tip 8 "Category of the generated eBook"
   !insertmacro Tip 9 "The output filename (you will have to enter appropriate file extension)"
-  !insertmacro Tip 11 "Choose this if you don't want PDFRead to close after starting conversion."
+  !insertmacro Tip 11 "The page layout mode. Use default to use the mode defined in the profile."
   !insertmacro Tip 12 "Profile to use during conversion"
   !insertmacro Tip 13 "Disable the cropping stage during conversion"
   !insertmacro Tip 14 "Disable the image dilation stage during conversion"
@@ -133,14 +133,14 @@ start:
   !insertmacro DefaultParam 16 '--crop-percent' '2.0'
   !insertmacro DefaultParam 17 '--dpi' '300'
   !insertmacro DefaultParam 18 '--edge-level' '5'
+  !insertmacro DefaultParam 9  '-m' 'default'
   
   !insertmacro OptionalParam 19 '-u'
   
   !insertmacro MUI_INSTALLOPTIONS_READ $R3 "pdfread-gui.ini" "Field 3" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ $R4 "pdfread-gui.ini" "Field 9" "State"
   Strcpy $R2 '$R2 "$R3"'
   Exec '"$EXEDIR\pdfread-run.cmd" $R2'
-  IntCmpU $R4 1 start
+  Goto start
 finish:
 
 FunctionEnd

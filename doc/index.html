@@ -158,7 +158,7 @@ Options:
   -c CATEGORY         generated ebook category (default: "General")
   -f FORMAT           one of: imp2, imp1, html, rb, lrf
   -i FORMAT           one of: pdf, imglist, djvu, tiff
-  -m MODE             one of: landscape, potrait
+  -m MODE             one of: portrait, landscape-half, landscape
   -u ARGS             command line arguments for unpaper
   -d DIR              the temporary directory where images are generated
   --first-page=PAGE   first page to convert
@@ -177,6 +177,7 @@ Options:
   --no-crop           disable the cropping stage
   --no-dilate         disable the dilation stage
   --no-enhance        disable the edge enhancement stage
+  --no-toc            disable the generation of Table of Contents
   --list-profiles     show the various profiles and their settings
 </pre>
 
@@ -189,6 +190,7 @@ Options:
 <ul>
 <li>add a "landscape-half" mode which splits a page into two even halves (gdxf's suggestion)</li>
 <li>if the output document does not have the proper file extension, then append it automatically.</li>
+<li>fix the problems if the PDF has an incorrect TOC referring to an invalid page. Also added option --no-toc to disable TOC generation.</li>
 </ul>
 
 <h3>[2007-04-25] 1.6</h3>

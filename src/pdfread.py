@@ -147,6 +147,7 @@ def parse_cmdline():
   parser.add_option('--no-crop',    action='store_true',   help='disable the cropping stage')
   parser.add_option('--no-dilate',  action='store_true',   help='disable the dilation stage')
   parser.add_option('--no-enhance', action='store_true',   help='disable the edge enhancement stage')
+  parser.add_option('--no-toc',     action='store_true',   help='disable the generation of Table of Contents')
   parser.add_option('--list-profiles', dest='profile_help', action='store_true',
                     help='show the various profiles and their settings')
 

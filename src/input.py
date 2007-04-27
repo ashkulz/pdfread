@@ -36,12 +36,12 @@ class PdfInput(BaseInput):
   __plugin__ = 'pdf'
 
   """ initalise """
-  def __init__(self, input, dpi, **args):
+  def __init__(self, input, dpi, no_toc, **args):
     self.input, self.dpi = os.path.abspath(input), dpi
-    self.get_meta_info()
+    self.get_meta_info(no_toc)
 
   """ get meta information from the PDF file """
-  def get_meta_info(self):
+  def get_meta_info(self, no_toc=False):
     self.count   = 0
     self.toc     = []
     self.toc_map = {}
@@ -53,7 +53,8 @@ class PdfInput(BaseInput):
       if match:
         self.count = int(match.group(1))
 
-      self.toc = PDFTK_TOC.findall(data)
+      if not no_toc:
+        self.toc = PDFTK_TOC.findall(data)
 
     elif COMMANDS['pdfinfo']:
       data  = call('pdfinfo', self.input)
