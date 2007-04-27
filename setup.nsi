@@ -63,6 +63,9 @@ Section "Install Section" SecInstall
   WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\PDFRead" "DisplayName" "PDFRead ${VERSION}"
   WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\PDFRead" "UninstallString" "$INSTDIR\uninstall.exe"
   
+  WriteRegStr HKLM "SOFTWARE\GPL Ghostscript\8.56" "GS_DLL" "$INSTDIR\bin\gsdll32.dll"
+  WriteRegStr HKLM "SOFTWARE\GPL Ghostscript\8.56" "GS_LIB" "$INSTDIR\gs\fonts;$INSTDIR\gs\lib"
+  
   ClearErrors
   ReadRegStr $R0 HKCR ".pdf" ""
   IfErrors skip_context
@@ -82,6 +85,7 @@ SectionEnd
 ;Uninstaller Section
 
 Section "Uninstall"
+  DeleteRegKey HKLM "SOFTWARE\GPL Ghostscript\8.56"
   DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\PDFRead"
   RMDir /r "$INSTDIR"
   SetShellVarContext all

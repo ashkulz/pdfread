@@ -62,7 +62,7 @@
 <em>This assumes you have Ubuntu. If you don't, then install the equivalent
 packages for your distribution.</em>
 <ol>
-<li>Open up a terminal window, and install the following packages:<blockquote>sudo apt-get install pdftk python-imaging imagemagick gs-common djvulibre-bin libtiff-tools unpaper optipng</blockquote></li>
+<li>Open up a terminal window, and install the following packages:<blockquote>sudo apt-get install pdftk python-imaging pngnq gs-common djvulibre-bin libtiff-tools unpaper optipng</blockquote></li>
 <li>Download the <a href="https://sourceforge.net/project/showfiles.php?group_id=87679&package_id=91453">PDFRead source code</a> and extract it somewhere.</li>
 
 <li>The above directory will contain a command line program, execute it via <blockquote>python pdfread.py &lt;options&gt; pdf-file</blockquote></li>
@@ -75,9 +75,9 @@ packages for your distribution.</em>
 
 <li>Install the <a href="http://developer.apple.com/tools/">Apple developer tools</a>.</li>
 <li>Install the <a href="http://www.python.org/download/">latest python</a> version. The Mac OS X installer application puts a big "MacPython 2.5" folder in your applications folder. Go into that folder and double-click the "Update Shell Profile.command" file.</li>
-<li>Install <a href="http://www.pdfhacks.com/pdftk/#packages">pdftk</a>.</li>
+<li>Install <a href="http://www.pdfhacks.com/pdftk/#packages">pdftk</a> and <a href="http://www.cybertherial.com/pngnq/pngnq.html">pngnq 0.41</a>.</li>
 <li>Install <a href="http://www.finkproject.org/download/index.php">fink</a> and then install the necessary packages by typing this in the Terminal:
-<blockquote>sudo apt-get install imagemagick ghostscript ghostscript-fonts libtiff-bin djvulibre optipng</blockquote></li>
+<blockquote>sudo apt-get install ghostscript ghostscript-fonts libtiff-bin djvulibre optipng</blockquote></li>
 <li>Download the <a href="http://www.pythonware.com/products/pil/">latest Python Imaging Library source</a>, extract it and install it via
 <blockquote>sudo python setup.py install</blockquote></li>
 <li>In case you want to convert DJVU documents, please install <a href="http://pdb.finkproject.org/pdb/package.php/djvulibre">djvulibre from Fink</a> or install it yourself.</li>
@@ -186,10 +186,11 @@ Options:
 
 <H2 id="changes">Changelog</H2>
 
-<h3>[2007-xx-xx] 1.7</h3>
+<h3>[2007-04-27] 1.7</h3>
 <ul>
 <li>add a "landscape-half" mode which splits a page into two even halves (gdxf's suggestion)</li>
 <li>if the output document does not have the proper file extension, then append it automatically.</li>
+<li>remove imagemagick and use <a href="http://www.cybertherial.com/pngnq/pngnq.html">pngnq</a> for color reduction.</li>
 <li>fix the problems if the PDF has an incorrect TOC referring to an invalid page. Also added option --no-toc to disable TOC generation.</li>
 </ul>
 

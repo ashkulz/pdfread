@@ -193,6 +193,12 @@ class LandscapeHalfMode(BaseMode):
     self.hres, self.vres, self.overlap = hres, vres, overlap
     self.rotate = ROTATION[rotate]
 
+  def xform(self, img):
+    if self.rotate is None:
+      return img
+      
+    return img.transpose(self.rotate)
+
   """ execute """
   def __call__(self, image):
     p('SPLIT ')
@@ -208,8 +214,8 @@ class LandscapeHalfMode(BaseMode):
     output = image.resize(size, Image.ANTIALIAS)
 
     if size[1] <= self.hres:
-      return [ output ]
+      return [ self.xform(output) ]
 
     # need to split it up
-    return [ output.crop((0, 0, size[0], self.hres)),
-             output.crop((0, self.hres - self.overlap, size[0], size[1])) ]
+    return [ self.xform(output.crop((0, 0, size[0], self.hres))),
+             self.xform(output.crop((0, self.hres - self.overlap, size[0], size[1]))) ]

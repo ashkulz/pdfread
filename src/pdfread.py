@@ -70,10 +70,6 @@ def convert(pages, input, mode_tranform, output, crop_percent,
 def main():
   input, output, mode, options, parser = parse_cmdline()
 
-  if options.colors >= 2 and not COMMANDS['convert']:
-    parser.error('To use color downsampling, please install ImageMagick')
-    sys.exit(1)
-
   first = options.first_page or 1
   last  = options.last_page  or input.count
 

@@ -160,14 +160,14 @@ class FullVgaImpOutput(ImpOutput):
   __plugin__ = 'imp1'
 
   def generate(self, toc):
-    self.generate_imp(toc, 1)
+    return self.generate_imp(toc, 1)
 
 """ support for IMP output for the HalfVga profile """
 class HalfVgaImpOutput(ImpOutput):
   __plugin__ = 'imp2'
 
   def generate(self, toc):
-    self.generate_imp(toc, 2)
+    return self.generate_imp(toc, 2)
 
 
 ########################################################## BBEB OUTPUT

@@ -35,7 +35,7 @@ COMMANDS = {
   'gs'        : False,
   'pdftk'     : False,
   'rbmake'    : False,
-  'convert'   : False,
+  'pngnq'     : False,
   'pdfinfo'   : False,
   'djvused'   : False,
   'tiffcp'    : False,
@@ -122,7 +122,7 @@ class BaseOutput(object):
         continue
 
       filename = IMAGENAME_SPEC % self.n
-      if self.colors < 2:
+      if self.colors <= 2:
         image.save(filename)
       else:
         self.downsample(image, filename)
@@ -135,12 +135,9 @@ class BaseOutput(object):
 
   def downsample(self, image, filename):
     image.save('page.png')
-    if self.colors == 2:
-      call('convert', 'page.png', '-dither',
-           '-monochrome', filename)
-    else:
-      call('convert', 'page.png', '-dither',
-           '-colors', str(self.colors), filename)
+    call('pngnq', '-fs', '1', '-n', str(self.colors), 'page.png')
+    if os.path.exists('page-nq8.png'):
+      os.rename('page-nq8.png', filename)
 
   def move_output(self, ext):
     fname = self.output
