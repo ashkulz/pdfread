@@ -117,9 +117,9 @@ def unpaper(image, args):
 ##############################################################################
 
 
-""" potrait mode """
-class PotraitMode(BaseMode):
-  __plugin__ = 'potrait'
+""" portrait mode """
+class PortraitMode(BaseMode):
+  __plugin__ = 'portrait'
 
   """ execute """
   def __call__(self, image):

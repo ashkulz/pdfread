@@ -48,9 +48,9 @@ PROFILES = {
   'reb1100'   : {'hres': 315, 'vres':472, 'mode': 'landscape', 'overlap':25, 'rotate':'none',  'colors': 0,  'format': 'rb'  },
   'eb1150'    : {'hres': 315, 'vres':445, 'mode': 'landscape', 'overlap':25, 'rotate':'left',  'colors': 16, 'format': 'imp2'},
   'reb1200'   : {'hres': 455, 'vres':595, 'mode': 'landscape', 'overlap':25, 'rotate':'left',  'colors': 16, 'format': 'imp1'},
-  'reb1200-p' : {'hres': 455, 'vres':595, 'mode': 'potrait',   'overlap':0,  'rotate':'none',  'colors': 16, 'format': 'imp1'},
+  'reb1200-p' : {'hres': 455, 'vres':595, 'mode': 'portrait',  'overlap':0,  'rotate':'none',  'colors': 16, 'format': 'imp1'},
   'prs500-l'  : {'hres': 565, 'vres':754, 'mode': 'landscape', 'overlap':25, 'rotate':'right', 'colors': 4,  'format': 'lrf' },
-  'prs500'    : {'hres': 565, 'vres':754, 'mode': 'potrait',   'overlap':0,  'rotate':'none',  'colors': 4,  'format': 'lrf' }
+  'prs500'    : {'hres': 565, 'vres':754, 'mode': 'portrait',  'overlap':0,  'rotate':'none',  'colors': 4,  'format': 'lrf' }
 }
 
 ROTATION = {
