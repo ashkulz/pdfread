@@ -59,7 +59,7 @@ def crop_axis(input, img, start, end, percent,
 
   # create image with shrunken axis
   newI   = sum([last-first for first, last in content])
-  output = Image.new('L', func_size(newI), None)
+  output = Image.new(input.mode, func_size(newI), None)
 
   # append the content parts
   i = 0
