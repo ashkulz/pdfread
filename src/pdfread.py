@@ -108,6 +108,7 @@ def parse_cmdline():
                       dpi=DEFAULT_DPI, colorspace=DEFAULT_COLORSPACE, 
                       edge_level=DEFAULT_EDGE_ENHANCE,
                       crop_percent=DEFAULT_CROP_PERCENT,
+                      overlap_h=DEFAULT_OVERLAP_H, overlap_v=DEFAULT_OVERLAP_V,
                       title='Unknown', author='Unknown', category='General')
 
   parser.add_option('-p', dest='profile', choices=profiles, help=opt_help(profiles))
@@ -142,7 +143,8 @@ def parse_cmdline():
   parser.add_option('--count', type='int', metavar='N', help='consider that the document has N pages')
   parser.add_option('--hres', dest='hres', type='int',       help='the maximum usable horizontal resolution')
   parser.add_option('--vres', dest='vres', type='int',       help='the maximum usable vertical resolution')
-  parser.add_option('--overlap', dest='overlap', type='int', help='screen overlap between pages (in pixels)')
+  parser.add_option('--overlap-h', type='int', metavar='PIXELS', help='horizontal overlap between pages (default: %default)')
+  parser.add_option('--overlap-v', type='int', metavar='PIXELS', help='vertical overlap between pages (default: %default)')
   parser.add_option('--no-crop',    action='store_true',   help='disable the cropping stage')
   parser.add_option('--no-dilate',  action='store_true',   help='disable the dilation stage')
   parser.add_option('--no-enhance', action='store_true',   help='disable the edge enhancement stage')
@@ -165,9 +167,6 @@ def parse_cmdline():
 
   if options.hres is None:
     options.hres       = PROFILES[options.profile]['hres']
-
-  if options.overlap is None:
-    options.overlap    = PROFILES[options.profile]['overlap']
 
   if options.rotate is None:
     options.rotate     = PROFILES[options.profile]['rotate']

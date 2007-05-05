@@ -24,7 +24,7 @@ import os, sys, math, Image, ImageFilter, ImageChops, ImageOps
 from common import *
 
 
-########################################################### PROCESSING
+########################################################### HELPER FUNCTIONS
 
 MAX_CROP_SIZE = 100
 MAX_CROP_STEP = 10
@@ -69,6 +69,42 @@ def crop_axis(input, img, start, end, percent,
 
   # return output
   return output
+
+""" internal function for splitting images into a NxN grid """
+def split_grid(image, n, target, overlap, rotate=None):
+  imgW, imgH          = image.size
+  overlapH, overlapW  = overlap
+  targetW, targetH    = target
+  nW, nH              = n
+
+  # find ratios
+  ratioW = ( float(targetW) * nW - (overlapW * (nW-1)) ) / imgW
+  ratioH = ( float(targetH) * nH - (overlapH * (nH-1)) ) / imgH
+  ratio  = min(ratioW, ratioH)
+
+  # fit maximum possible area
+  actual = ( int(imgW*ratio), int(imgH*ratio) )
+  output = image.resize(actual, Image.ANTIALIAS)
+
+  # shortcuts
+  ranges = lambda x,y: range(int(math.ceil(float(x)/y)))
+  offset = lambda val, n, overlap: n * (val - overlap)
+
+  # now chop up the resized image with requested overlapping
+  images = []
+  for x in ranges(actual[0], targetW):
+    for y in ranges(actual[1], targetH):
+      baseX, baseY = offset(targetW, x, overlapW), offset(targetH, y, overlapH)
+      im = output.crop( (baseX, baseY, min(baseX+targetW, actual[0]),
+                                       min(baseY+targetH, actual[1]) )  )
+      if rotate is not None:
+        im = im.transpose(rotate)
+
+      images.append(im)
+
+  return images
+
+########################################################### PROCESSING
 
 
 """ perform image cropping via whitespace detection """
@@ -142,8 +178,8 @@ class LandscapeMode(BaseMode):
   __plugin__ = 'landscape'
 
   """ initialise """
-  def __init__(self, hres, vres, overlap, rotate, **args):
-    self.hres, self.vres, self.overlap = hres, vres, overlap
+  def __init__(self, hres, vres, overlap_v, rotate, **args):
+    self.hres, self.vres, self.overlap = hres, vres, overlap_v
     self.rotate = ROTATION[rotate]
 
   """ execute """
@@ -183,39 +219,52 @@ class LandscapeMode(BaseMode):
 
 ##############################################################################
 
-
-""" landscape mode with only two pages """
+""" landscape mode with two fixed pages """
 class LandscapeHalfMode(BaseMode):
   __plugin__ = 'landscape-half'
 
   """ initialise """
-  def __init__(self, hres, vres, overlap, rotate, **args):
-    self.hres, self.vres, self.overlap = hres, vres, overlap
+  def __init__(self, hres, vres, overlap_v, rotate, **args):
+    self.hres, self.vres, self.overlap = hres, vres, overlap_v
     self.rotate = ROTATION[rotate]
-
-  def xform(self, img):
-    if self.rotate is None:
-      return img
-      
-    return img.transpose(self.rotate)
 
   """ execute """
   def __call__(self, image):
     p('SPLIT ')
-    output = []
+    return split_grid(image, (1,2), (self.vres, self.hres),
+                      (self.overlap, 0), self.rotate)
 
-    # find the ratios
-    imgH, imgV = image.size
-    ratioH     = float(self.vres)/imgH
-    ratioV     = float(self.hres * 2 - self.overlap)/imgV
+##############################################################################
 
-    ratio  = min(ratioH, ratioV)
-    size   = ( int(imgH*ratio), int(imgV*ratio) )
-    output = image.resize(size, Image.ANTIALIAS)
+""" landscape mode with three fixed pages """
+class LandscapeThirdMode(BaseMode):
+  __plugin__ = 'landscape-third'
 
-    if size[1] <= self.hres:
-      return [ self.xform(output) ]
+  """ initialise """
+  def __init__(self, hres, vres, overlap_v, rotate, **args):
+    self.hres, self.vres, self.overlap = hres, vres, overlap_v
+    self.rotate = ROTATION[rotate]
 
-    # need to split it up
-    return [ self.xform(output.crop((0, 0, size[0], self.hres))),
-             self.xform(output.crop((0, self.hres - self.overlap, size[0], size[1]))) ]
+  """ execute """
+  def __call__(self, image):
+    p('SPLIT ')
+    return split_grid(image, (1,3), (self.vres, self.hres),
+                      (self.overlap, 0), self.rotate)
+
+##############################################################################
+
+""" Portrait mode with two columns """
+class PortraitTwoColumnMode(BaseMode):
+  __plugin__ = 'portrait-2col'
+
+  """ initialise """
+  def __init__(self, hres, vres, overlap_v, overlap_h, rotate, **args):
+    self.hres, self.vres = hres, vres
+    self.overlap_v, self.overlap_h = overlap_v, overlap_h
+    self.rotate = ROTATION[rotate]
+
+  """ execute """
+  def __call__(self, image):
+    p('SPLIT ')
+    return split_grid(image, (2,2), (self.hres, self.vres),
+                      (self.overlap_v, self.overlap_h), self.rotate)

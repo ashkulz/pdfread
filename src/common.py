@@ -28,6 +28,8 @@ DEFAULT_DPI           = 300
 DEFAULT_EDGE_ENHANCE  = 5
 DEFAULT_CROP_PERCENT  = 2.0
 DEFAULT_COLORSPACE    = 'gray'
+DEFAULT_OVERLAP_H     = 20
+DEFAULT_OVERLAP_V     = 20
 IMAGENAME_SPEC        = '%d.png'
 
 ########################################################### COMMANDS
@@ -46,12 +48,12 @@ COMMANDS = {
 ########################################################### PROFILES
 
 PROFILES = {
-  'reb1100'   : {'hres': 315, 'vres':472, 'mode': 'landscape', 'overlap':25, 'rotate':'none',  'colors': 0,  'format': 'rb'  },
-  'eb1150'    : {'hres': 315, 'vres':445, 'mode': 'landscape', 'overlap':25, 'rotate':'left',  'colors': 16, 'format': 'imp2'},
-  'reb1200'   : {'hres': 455, 'vres':595, 'mode': 'landscape', 'overlap':25, 'rotate':'left',  'colors': 16, 'format': 'imp1'},
-  'reb1200-p' : {'hres': 455, 'vres':595, 'mode': 'portrait',  'overlap':0,  'rotate':'none',  'colors': 16, 'format': 'imp1'},
-  'prs500-l'  : {'hres': 565, 'vres':754, 'mode': 'landscape', 'overlap':25, 'rotate':'right', 'colors': 4,  'format': 'lrf' },
-  'prs500'    : {'hres': 565, 'vres':754, 'mode': 'portrait',  'overlap':0,  'rotate':'none',  'colors': 4,  'format': 'lrf' }
+  'reb1100'   : {'hres': 315, 'vres':472, 'mode': 'landscape', 'rotate':'none',  'colors': 0,  'format': 'rb'  },
+  'eb1150'    : {'hres': 315, 'vres':445, 'mode': 'landscape', 'rotate':'left',  'colors': 16, 'format': 'imp2'},
+  'reb1200'   : {'hres': 455, 'vres':595, 'mode': 'landscape', 'rotate':'left',  'colors': 16, 'format': 'imp1'},
+  'reb1200-p' : {'hres': 455, 'vres':595, 'mode': 'portrait',  'rotate':'none',  'colors': 16, 'format': 'imp1'},
+  'prs500-l'  : {'hres': 565, 'vres':754, 'mode': 'landscape', 'rotate':'right', 'colors': 4,  'format': 'lrf' },
+  'prs500'    : {'hres': 565, 'vres':754, 'mode': 'portrait',  'rotate':'none',  'colors': 4,  'format': 'lrf' }
 }
 
 ROTATION = {
