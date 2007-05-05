@@ -22,23 +22,23 @@
 import os, re, glob, Image
 from common import *
 
-
 ########################################################### PDF INPUT
 
 
 PDFTK_COUNT   = re.compile(r'NumberOfPages: (\d+)')
 PDFTK_TOC     = re.compile(r'BookmarkTitle:\s+(.*)\s+BookmarkLevel:\s+(\d+)\s+BookmarkPageNumber:\s+(\d+)')
 PDFINFO_COUNT = re.compile(r'Pages:\s+(\d+)')
-
+PDF_DEVICE    = { 'gray' : 'pnggray', 'rgb' : 'png16m' }
 
 """ support for the PDF format """
 class PdfInput(BaseInput):
   __plugin__ = 'pdf'
 
   """ initalise """
-  def __init__(self, input, dpi, no_toc, **args):
-    self.input, self.dpi = os.path.abspath(input), dpi
+  def __init__(self, input, dpi, colorspace, no_toc, **args):
+    self.input, self.dpi = input, dpi
     self.get_meta_info(no_toc)
+    self.device = '-sDEVICE=%s' % PDF_DEVICE[colorspace]
 
   """ get meta information from the PDF file """
   def get_meta_info(self, no_toc=False):
@@ -76,7 +76,7 @@ class PdfInput(BaseInput):
     call('gs', '-q', '-dBATCH', '-dSAFER', '-dNOPAUSE', '-dDOINTERPOLATE',
          '-dTextAlphaBits=4', '-dGraphicsAlphaBits=4', '-dUseCropBox',
          '-r%d' % self.dpi, '-dFirstPage=%d' % n, '-dLastPage=%d' % n,
-         '-sDEVICE=pnggray', '-sOutputFile=page.png', self.input)
+         self.device, '-sOutputFile=page.png', self.input)
 
     if not os.path.exists('page.png'):
       return None
@@ -86,15 +86,18 @@ class PdfInput(BaseInput):
 
 ########################################################## DJVU INPUT
 
+DJVU_MODE = { 'gray' : 'black', 'rgb' : 'color' }
 
 """ support for the DJVU format """
 class DjvuInput(BaseInput):
   __plugin__ = 'djvu'
 
   """ initalise """
-  def __init__(self, input, dpi, **args):
-    self.input, self.dpi = os.path.abspath(input), dpi
+  def __init__(self, input, dpi, colorspace, **args):
+    self.input, self.dpi = input, dpi
     self.get_meta_info()
+    self.mode   = '-mode=%s' % DJVU_MODE[colorspace]
+    self.immode = COLORSPACE[colorspace]
 
   """ get meta information from the document """
   def get_meta_info(self):
@@ -114,13 +117,13 @@ class DjvuInput(BaseInput):
   """ get a page from the document """
   def get_page(self, n):
 
-    call('ddjvu', '-black', '-page', str(n), '-scale', str(self.dpi),
-         self.input, 'page.pbm')
+    call('ddjvu', self.mode, '-page', str(n), '-scale', str(self.dpi),
+         self.input, 'page.pnm')
 
-    if not os.path.exists('page.pbm'):
+    if not os.path.exists('page.pnm'):
       return None
 
-    return Image.open('page.pbm').convert('L')
+    return Image.open('page.pnm').convert(self.immode)
 
 ########################################################## TIFF INPUT
 
@@ -130,9 +133,10 @@ class TiffInput(BaseInput):
   __plugin__ = 'tiff'
 
   """ initalise """
-  def __init__(self, input, dpi, tempdir, **args):
-    self.input, self.dpi = os.path.abspath(input), dpi
+  def __init__(self, input, dpi, colorspace, tempdir, **args):
+    self.input, self.dpi = input, dpi
     self.get_meta_info(tempdir)
+    self.immode = COLORSPACE[colorspace]
 
   """ get meta information from the document """
   def get_meta_info(self, tempdir):
@@ -157,7 +161,7 @@ class TiffInput(BaseInput):
     if n < 1 or n > self.count:
       return None
 
-    return Image.open(self.files[n-1]).convert('L')
+    return Image.open(self.files[n-1]).convert(self.immode)
 
 
 ########################################################## LIST INPUT
@@ -168,8 +172,9 @@ class ImageListInput(BaseInput):
   __plugin__ = 'imglist'
 
   """ initalise """
-  def __init__(self, input, tempdir, **args):
-    self.input = os.path.abspath(input)
+  def __init__(self, input, colorspace, **args):
+    self.input = input
+    self.immode = COLORSPACE[colorspace]
     self.load_images()
 
   """ load the images from the list """
@@ -186,7 +191,7 @@ class ImageListInput(BaseInput):
       filename = os.path.abspath(name.strip())
       if filename and os.path.exists(filename):
         try:
-          image = Image.open(filename).convert('L')
+          image = Image.open(filename).convert(self.immode)
           self.files.append(image)
         except:
           pass

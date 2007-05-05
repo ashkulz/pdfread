@@ -27,6 +27,7 @@ DEFAULT_INPUT_FORMAT  = 'pdf'
 DEFAULT_DPI           = 300
 DEFAULT_EDGE_ENHANCE  = 5
 DEFAULT_CROP_PERCENT  = 2.0
+DEFAULT_COLORSPACE    = 'gray'
 IMAGENAME_SPEC        = '%d.png'
 
 ########################################################### COMMANDS
@@ -57,6 +58,11 @@ ROTATION = {
   'none'  : None,
   'left'  : Image.ROTATE_90,
   'right' : Image.ROTATE_270
+}
+
+COLORSPACE = { 
+  'gray'  : 'L',
+  'rgb'   : 'RGB'
 }
 
 ###################################################### BASE CLASSES

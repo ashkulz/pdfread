@@ -105,7 +105,8 @@ def parse_cmdline():
   parser = optparse.OptionParser(usage='%prog [options] input-document')
 
   parser.set_defaults(profile=DEFAULT_PROFILE, in_format=DEFAULT_INPUT_FORMAT,
-                      dpi=DEFAULT_DPI, edge_level = DEFAULT_EDGE_ENHANCE,
+                      dpi=DEFAULT_DPI, colorspace=DEFAULT_COLORSPACE, 
+                      edge_level=DEFAULT_EDGE_ENHANCE,
                       crop_percent=DEFAULT_CROP_PERCENT,
                       title='Unknown', author='Unknown', category='General')
 
@@ -132,6 +133,8 @@ def parse_cmdline():
                     help='the DPI at which to perform dilation (default: %default)')
   parser.add_option('--colors', metavar='N', type='int',
                     help='downsample the output image to N grayscale colors')
+  parser.add_option('--colorspace', metavar='TYPE', choices=COLORSPACE.keys(),
+                    help='the colorspace to use (default: %default)')
   parser.add_option('--mono', dest='colors', action='store_const', const=2,
                     help='downsample the output image to monochrome')
   parser.add_option('--rotate', choices=ROTATION.keys(), metavar='DIRECTION',
@@ -185,11 +188,13 @@ def parse_cmdline():
   if options.output:
     options.output     = os.path.abspath(options.output)
 
+  if not os.path.exists(args[0]) or not os.access(args[0], os.R_OK):
+    parser.error('input document does not exist or cannot be opened')
+
   check_commands()
 
   opt = options.__dict__
-
-  input  = IN_FORMATS[options.in_format](args[0], **opt)
+  input  = IN_FORMATS[options.in_format](os.path.abspath(args[0]), **opt)
   output = OUT_FORMATS[options.out_format](**opt)
   mode   = MODES[options.mode](**opt)
 
